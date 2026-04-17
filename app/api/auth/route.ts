@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_EMAIL = 'admin@kadobajo.com';
+const ADMIN_EMAIL = 'admin@kadobajo.id';
 const ADMIN_PASSWORD = '123456';
 
 export async function POST(req: NextRequest) {

@@ -1,8 +1,7 @@
 import { getAllCustomers } from '@/lib/customers';
 import CustomersClient from './CustomersClient';
 
-// app/(crm)/dashboard/page.tsx
-// app/(crm)/customers/page.tsx
+// Always render at request time — never statically at build
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {

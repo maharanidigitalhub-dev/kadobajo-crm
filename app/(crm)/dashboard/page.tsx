@@ -2,6 +2,9 @@ import { getAllCustomers, getRecentCustomers, getStatusColor } from '@/lib/custo
 import { Customer, CustomerStatus } from '@/types/customer';
 import Link from 'next/link';
 
+// Always render at request time — never statically at build
+export const dynamic = 'force-dynamic';
+
 const STATUS_ORDER: CustomerStatus[] = ['new', 'contacted', 'negotiation', 'deal', 'lost'];
 const STATUS_LABELS: Record<CustomerStatus, string> = {
   new: 'New',
@@ -139,6 +142,3 @@ export default async function DashboardPage() {
     </div>
   );
 }
-// app/(crm)/dashboard/page.tsx
-// app/(crm)/customers/page.tsx
-export const dynamic = 'force-dynamic';

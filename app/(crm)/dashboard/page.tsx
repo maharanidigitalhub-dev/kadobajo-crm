@@ -139,3 +139,6 @@ export default async function DashboardPage() {
     </div>
   );
 }
+// app/(crm)/dashboard/page.tsx
+// app/(crm)/customers/page.tsx
+export const dynamic = 'force-dynamic';

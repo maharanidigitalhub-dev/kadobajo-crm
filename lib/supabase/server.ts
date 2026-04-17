@@ -1,5 +1,5 @@
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 interface SupabaseResponse<T> {
   data: T | null;
@@ -10,6 +10,9 @@ async function supabaseRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<SupabaseResponse<T>> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return { data: null, error: { message: 'Supabase env vars not configured' } };
+  }
   const url = `${SUPABASE_URL}/rest/v1${path}`;
   const headers: Record<string, string> = {
     apikey: SUPABASE_ANON_KEY,

@@ -1,61 +1,63 @@
+import { promises as fs } from 'fs';
+import path from 'path';
 import { NextResponse } from 'next/server';
 
-type HomeContent = {
-  title: string;
-  description: string;
-  updatedAt: string;
+type CmsData = {
+  [key: string]: unknown;
 };
 
-type CmsRepository = {
-  getHomepage: () => HomeContent;
-  saveHomepage: (input: Pick<HomeContent, 'title' | 'description'>) => HomeContent;
-};
+const cmsFilePath = path.join(process.cwd(), 'data', 'cms.json');
 
-const memoryStore: { homepage: HomeContent } = {
-  homepage: {
-    title: 'Welcome to Kado Bajo',
-    description: 'Your one-stop destination for authentic gifts from Labuan Bajo.',
-    updatedAt: new Date().toISOString(),
-  },
-};
+async function readCmsFile(): Promise<CmsData> {
+  const raw = await fs.readFile(cmsFilePath, 'utf-8');
+  return JSON.parse(raw) as CmsData;
+}
 
-const cmsRepository: CmsRepository = {
-  getHomepage() {
-    return memoryStore.homepage;
-  },
-  saveHomepage(input) {
-    memoryStore.homepage = {
-      ...memoryStore.homepage,
-      title: input.title,
-      description: input.description,
-      updatedAt: new Date().toISOString(),
-    };
+async function writeCmsFile(data: CmsData): Promise<void> {
+  await fs.writeFile(cmsFilePath, JSON.stringify(data, null, 2), 'utf-8');
+}
 
-    return memoryStore.homepage;
-  },
-};
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const key = searchParams.get('key');
 
-export async function GET() {
-  return NextResponse.json({ data: cmsRepository.getHomepage() }, { status: 200 });
+    if (!key) {
+      return NextResponse.json({ error: 'Query parameter "key" is required.' }, { status: 400 });
+    }
+
+    const cms = await readCmsFile();
+
+    if (!(key in cms)) {
+      return NextResponse.json({ error: `Key "${key}" not found.` }, { status: 404 });
+    }
+
+    return NextResponse.json({ key, data: cms[key] }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: 'Failed to load CMS data.' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as Partial<Pick<HomeContent, 'title' | 'description'>>;
+    const body = (await request.json()) as { key?: string; data?: unknown };
+    const key = body.key?.trim();
 
-    const title = body.title?.trim() ?? '';
-    const description = body.description?.trim() ?? '';
-
-    if (!title || !description) {
-      return NextResponse.json(
-        { error: 'Title and description are required.' },
-        { status: 400 }
-      );
+    if (!key) {
+      return NextResponse.json({ error: 'Field "key" is required.' }, { status: 400 });
     }
 
-    const saved = cmsRepository.saveHomepage({ title, description });
-    return NextResponse.json({ data: saved }, { status: 200 });
+    if (typeof body.data === 'undefined') {
+      return NextResponse.json({ error: 'Field "data" is required.' }, { status: 400 });
+    }
+
+    const cms = await readCmsFile();
+    cms[key] = body.data;
+
+    await writeCmsFile(cms);
+
+    return NextResponse.json({ success: true, key, data: cms[key] }, { status: 200 });
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON payload.' }, { status: 400 });
+    return NextResponse.json({ error: 'Failed to save CMS data.' }, { status: 500 });
   }
 }

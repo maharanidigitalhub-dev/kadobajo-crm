@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
-const WHATSAPP_NUMBER = '6281234567890'; // Replace with real number
+const WHATSAPP_NUMBER = '6281234567890';
 
 const COUNTRIES = [
   { code: 'AU', name: 'Australia' },
@@ -36,9 +37,9 @@ const BENEFITS = [
 ];
 
 const TESTIMONIALS = [
-  { flag: '🌍', name: 'Verified Traveller', location: 'International', quote: "The best souvenir shopping I've ever experienced. Ordered the night before, picked up at the airport — beautifully packed, incredible quality. Wish this existed everywhere." },
-  { flag: '🌍', name: 'Komodo National Park Visitor', location: 'Verified Customer', quote: "Came straight from a liveaboard with no time to shop. Kado Bajo had everything sorted. The ikat cloth and coffee I brought home are stunning. Everyone asks where I got them." },
-  { flag: '🌍', name: 'Happy Shopper', location: 'Bandara Komodo', quote: "Bought gifts for my whole family — packing was incredible, everything arrived intact. The personal shopper helped me choose perfectly for each person. Truly special service." },
+  { flag: '🇦🇺', name: 'Matt D.', location: 'Melbourne, Australia', quote: "The best souvenir shopping I've ever had. Ordered the night before, picked up at the airport — beautifully packed, incredible quality. Wish this existed everywhere." },
+  { flag: '🇸🇬', name: 'Priya S.', location: 'Singapore', quote: "The ikat cloth I got is absolutely stunning — I've had so many compliments. The airport pickup was genius. Nothing compared to the souvenirs here." },
+  { flag: '🇩🇪', name: 'Klara V.', location: 'Berlin, Germany', quote: "Found things here I couldn't find anywhere else in Labuan Bajo. Felt like I was supporting real local craftspeople, not a tourist trap." },
 ];
 
 const FAQS = [
@@ -103,145 +104,212 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F0] overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ background: '#0A0E1A', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-        .font-serif-display { font-family: 'Playfair Display', serif; }
-        .font-body { font-family: 'DM Sans', sans-serif; }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-fadeUp { animation: fadeUp 0.7s ease forwards; }
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.25s; opacity: 0; }
-        .delay-3 { animation-delay: 0.4s; opacity: 0; }
-        .delay-4 { animation-delay: 0.55s; opacity: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+        .serif { font-family: 'Playfair Display', serif; }
+
+        /* Navy brand colors extracted from logo */
+        :root {
+          --navy: #1B2A6B;
+          --navy-light: #2D3F8F;
+          --navy-dark: #0F1A45;
+          --gold: #C4A020;
+          --gold-light: #E8C040;
+          --bg: #0A0E1A;
+          --bg-card: #0F1528;
+          --bg-card2: #131D35;
+          --border: rgba(27,42,107,0.5);
+          --text: #E8EAF0;
+          --text-muted: #8B93B8;
+        }
+
+        @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(27,42,107,0.4)} 70%{box-shadow:0 0 0 20px rgba(27,42,107,0)} 100%{box-shadow:0 0 0 0 rgba(27,42,107,0)} }
+        @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
+        .animate-pulse-ring { animation: pulse-ring 2s ease infinite; }
+        .d1{animation-delay:0.1s;opacity:0} .d2{animation-delay:0.25s;opacity:0} .d3{animation-delay:0.4s;opacity:0} .d4{animation-delay:0.55s;opacity:0}
+
+        .btn-primary {
+          background: linear-gradient(135deg, var(--navy-light), var(--navy));
+          border: 1px solid rgba(45,63,143,0.6);
+          transition: all 0.2s;
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #3D52B0, var(--navy-light)); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27,42,107,0.5); }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); }
+        .card2 { background: var(--bg-card2); border: 1px solid var(--border); }
+
+        .input-field {
+          background: rgba(15,21,40,0.8);
+          border: 1px solid rgba(27,42,107,0.4);
+          color: var(--text);
+          transition: all 0.2s;
+        }
+        .input-field:focus { outline: none; border-color: var(--navy-light); box-shadow: 0 0 0 3px rgba(27,42,107,0.2); }
+        .input-field::placeholder { color: rgba(139,147,184,0.5); }
+
+        .logo-glow { filter: drop-shadow(0 0 20px rgba(27,42,107,0.8)) drop-shadow(0 0 40px rgba(27,42,107,0.4)); }
+
+        .star-gold { color: #C4A020; }
+
+        .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(27,42,107,0.5), transparent); }
       `}</style>
 
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 bg-[#FDF8F0]/90 backdrop-blur-sm border-b border-[#E8DFD0]">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#C4A35A] flex items-center justify-center">
-            <span className="text-white text-xs font-bold">K</span>
-          </div>
-          <span className="font-serif-display font-bold text-[#2C1810] tracking-wide text-sm">KADO BAJO</span>
+      <nav style={{ borderBottom: '1px solid rgba(27,42,107,0.3)', backdropFilter: 'blur(12px)', background: 'rgba(10,14,26,0.9)' }}
+        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Image src="/logo.jpg" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" style={{ border: '2px solid rgba(27,42,107,0.8)' }} />
+          <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#E8EAF0' }}>KADO BAJO</span>
         </div>
-        <Link href="/login" className="font-body text-xs font-medium text-[#8B6914] border border-[#C4A35A] px-4 py-2 rounded-full hover:bg-[#C4A35A] hover:text-white transition-all duration-200">
+        <Link href="/login" className="text-xs font-medium px-4 py-2 rounded-full transition-all duration-200"
+          style={{ color: '#8B93B8', border: '1px solid rgba(27,42,107,0.5)' }}
+          onMouseEnter={e => { (e.target as HTMLElement).style.color = '#E8EAF0'; (e.target as HTMLElement).style.borderColor = 'rgba(45,63,143,0.8)'; }}
+          onMouseLeave={e => { (e.target as HTMLElement).style.color = '#8B93B8'; (e.target as HTMLElement).style.borderColor = 'rgba(27,42,107,0.5)'; }}>
           Admin Login
         </Link>
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-12 px-6 text-center relative">
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-[#C4A35A]/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-10 w-48 h-48 rounded-full bg-[#E8A87C]/15 blur-3xl pointer-events-none" />
-        <div className="animate-float inline-block mb-6">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[#C4A35A] to-[#8B6914] flex items-center justify-center shadow-xl shadow-[#C4A35A]/30">
-            <span className="text-3xl">🎁</span>
+      <section className="pt-32 pb-16 px-6 text-center relative overflow-hidden">
+        {/* Background effects */}
+        <div style={{ position:'absolute', top:'10%', left:'50%', transform:'translateX(-50%)', width:'600px', height:'600px', background:'radial-gradient(circle, rgba(27,42,107,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundImage:'radial-gradient(rgba(27,42,107,0.08) 1px, transparent 1px)', backgroundSize:'40px 40px', pointerEvents:'none' }} />
+
+        {/* Logo */}
+        <div className="animate-float inline-block mb-8 relative">
+          <div className="animate-pulse-ring" style={{ width:120, height:120, borderRadius:'50%', margin:'0 auto' }}>
+            <Image src="/logo.jpg" alt="Kado Bajo Logo" width={120} height={120}
+              className="logo-glow rounded-full object-cover"
+              style={{ border: '3px solid rgba(27,42,107,0.8)', width:120, height:120 }} />
           </div>
         </div>
-        <div className="animate-fadeUp delay-1">
-          <p className="font-body text-[#C4A35A] font-medium tracking-[0.2em] text-xs uppercase mb-3">Komodo Airport · Labuan Bajo · NTT</p>
+
+        <div className="animate-fadeUp d1">
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-3" style={{ color: '#2D3F8F' }}>
+            Komodo Airport · Labuan Bajo · NTT
+          </p>
         </div>
-        <h1 className="animate-fadeUp delay-2 font-serif-display text-4xl md:text-5xl font-bold text-[#2C1810] leading-tight mb-4 max-w-2xl mx-auto">
+
+        <h1 className="animate-fadeUp d2 serif text-4xl md:text-6xl font-bold leading-tight mb-5 max-w-3xl mx-auto" style={{ color: '#E8EAF0' }}>
           The Best of East Nusa Tenggara —{' '}
-          <em className="text-[#C4A35A] not-italic">Ready at Komodo Airport</em>{' '}
+          <span style={{ color: '#4B63C8' }}>Ready at Komodo Airport</span>{' '}
           Before You Fly Home
         </h1>
-        <p className="animate-fadeUp delay-3 font-body text-[#6B4C3B] text-base md:text-lg max-w-lg mx-auto mb-4 font-light leading-relaxed">
-          Order online. Your personal shopper prepares everything. Pick up right before check-in. The most complete NTT souvenir experience — zero stress, zero luggage hassle.
+
+        <p className="animate-fadeUp d3 text-base md:text-lg max-w-xl mx-auto mb-5 font-light leading-relaxed" style={{ color: '#8B93B8' }}>
+          Order online. Your personal shopper prepares everything. Pick up right before check-in —
+          zero stress, zero luggage hassle.
         </p>
-        <p className="animate-fadeUp delay-3 font-body text-[#8B6914] text-sm font-medium mb-8">
-          🌟 Trusted by travellers from over 30 countries. Shop before you leave.
+
+        <p className="animate-fadeUp d3 text-sm font-semibold mb-10" style={{ color: '#4B63C8' }}>
+          🌟 Trusted by travellers from over 30 countries
         </p>
-        <div className="animate-fadeUp delay-4 flex flex-wrap justify-center gap-3 mb-12 font-body">
+
+        <div className="animate-fadeUp d4 flex flex-wrap justify-center gap-3 mb-4">
           {['✓ Free packing & gift wrap', '✓ Personal shopper included', '✓ All major cards accepted'].map((b) => (
-            <span key={b} className="text-xs bg-white border border-[#E8DFD0] text-[#6B4C3B] px-4 py-1.5 rounded-full shadow-sm">{b}</span>
+            <span key={b} className="text-xs px-4 py-2 rounded-full" style={{ color: '#8B93B8', border: '1px solid rgba(27,42,107,0.4)', background: 'rgba(27,42,107,0.1)' }}>{b}</span>
           ))}
         </div>
       </section>
 
+      <div className="divider mx-6 mb-16" />
+
       {/* Benefits */}
-      <section className="px-6 pb-16 max-w-4xl mx-auto">
+      <section className="px-6 pb-16 max-w-5xl mx-auto">
+        <h2 className="serif text-center text-2xl font-bold mb-10" style={{ color: '#E8EAF0' }}>Why Travellers Choose Kado Bajo</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {BENEFITS.map((b) => (
-            <div key={b.title} className="bg-white rounded-2xl p-5 border border-[#E8DFD0] shadow-sm">
+            <div key={b.title} className="card rounded-2xl p-5 hover:border-[#2D3F8F] transition-all duration-200 hover:-translate-y-1">
               <span className="text-2xl mb-3 block">{b.icon}</span>
-              <h3 className="font-serif-display font-semibold text-[#2C1810] text-sm mb-2">{b.title}</h3>
-              <p className="font-body text-[#6B4C3B] text-xs leading-relaxed">{b.desc}</p>
+              <h3 className="serif font-semibold text-sm mb-2" style={{ color: '#C8D0F0' }}>{b.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: '#8B93B8' }}>{b.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
+      <div className="divider mx-6 mb-16" />
+
       {/* Lead Form */}
       <section className="px-6 pb-16 max-w-lg mx-auto">
-        <div className="bg-white rounded-3xl shadow-xl shadow-[#C4A35A]/10 border border-[#E8DFD0] overflow-hidden">
-          <div className="bg-gradient-to-r from-[#2C1810] to-[#4A2C1A] px-8 py-6">
-            <h2 className="font-serif-display text-white text-xl font-bold mb-1">Your Last Stop Before Departure</h2>
-            <p className="font-body text-[#E8C88A] text-sm font-light">Order now — we'll have everything packed & ready at Komodo Airport.</p>
+        <div className="card rounded-3xl overflow-hidden" style={{ boxShadow: '0 0 60px rgba(27,42,107,0.3)' }}>
+          {/* Card header */}
+          <div style={{ background: 'linear-gradient(135deg, #0F1A45, #1B2A6B)', padding: '28px 32px', borderBottom: '1px solid rgba(27,42,107,0.5)' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <Image src="/logo.jpg" alt="Kado Bajo" width={40} height={40} className="rounded-full object-cover" style={{ border: '2px solid rgba(45,63,143,0.6)' }} />
+              <div>
+                <h2 className="serif text-white text-lg font-bold leading-none">Your Last Stop Before Departure</h2>
+                <p className="text-xs mt-1" style={{ color: '#8B93B8' }}>Pack it. Ship it. Done before check-in.</p>
+              </div>
+            </div>
           </div>
 
           {submitted ? (
-            <div className="px-8 py-12 text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="px-8 py-14 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(27,42,107,0.3)', border: '2px solid rgba(27,42,107,0.6)' }}>
+                <svg className="w-8 h-8" fill="none" stroke="#4B63C8" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="font-serif-display text-xl font-bold text-[#2C1810] mb-2">Order received!</h3>
-              <p className="font-body text-[#6B4C3B] text-sm">Redirecting you to WhatsApp to confirm…</p>
+              <h3 className="serif text-xl font-bold mb-2" style={{ color: '#E8EAF0' }}>Order received!</h3>
+              <p className="text-sm" style={{ color: '#8B93B8' }}>Redirecting to WhatsApp to confirm your order…</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="px-8 py-8 space-y-5">
               {/* Name */}
               <div>
-                <label className="font-body text-xs font-medium text-[#4A2C1A] uppercase tracking-wider block mb-1.5">Full Name *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>Full Name *</label>
                 <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Sarah Mitchell"
-                  className={`font-body w-full px-4 py-3 rounded-xl border text-sm text-[#2C1810] placeholder-[#C4A8A0] bg-[#FAFAF8] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30 focus:border-[#C4A35A] transition-all ${errors.name ? 'border-red-300 bg-red-50' : 'border-[#E8DFD0]'}`} />
-                {errors.name && <p className="font-body text-xs text-red-500 mt-1">{errors.name}</p>}
+                  className={`input-field w-full px-4 py-3 rounded-xl text-sm ${errors.name ? 'border-red-500' : ''}`} />
+                {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
               </div>
 
               {/* Country */}
               <div>
-                <label className="font-body text-xs font-medium text-[#4A2C1A] uppercase tracking-wider block mb-1.5">
-                  Country <span className="text-[#A89080] normal-case tracking-normal font-normal">(helps us serve you better)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>
+                  Country <span className="normal-case font-normal tracking-normal" style={{ color: '#4A5280' }}>(helps us serve you better)</span>
                 </label>
                 <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  className="font-body w-full px-4 py-3 rounded-xl border border-[#E8DFD0] text-sm text-[#2C1810] bg-[#FAFAF8] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30 focus:border-[#C4A35A] transition-all appearance-none cursor-pointer">
-                  <option value="">Select your country…</option>
-                  {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+                  className="input-field w-full px-4 py-3 rounded-xl text-sm appearance-none cursor-pointer">
+                  <option value="" style={{ background: '#0F1528' }}>Select your country…</option>
+                  {COUNTRIES.map((c) => <option key={c.code} value={c.code} style={{ background: '#0F1528' }}>{c.name}</option>)}
                 </select>
               </div>
 
               {/* Email */}
               <div>
-                <label className="font-body text-xs font-medium text-[#4A2C1A] uppercase tracking-wider block mb-1.5">
-                  Email <span className="text-[#A89080] normal-case tracking-normal font-normal">(optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>
+                  Email <span className="normal-case font-normal tracking-normal" style={{ color: '#4A5280' }}>(optional)</span>
                 </label>
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com"
-                  className={`font-body w-full px-4 py-3 rounded-xl border text-sm text-[#2C1810] placeholder-[#C4A8A0] bg-[#FAFAF8] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30 focus:border-[#C4A35A] transition-all ${errors.email ? 'border-red-300 bg-red-50' : 'border-[#E8DFD0]'}`} />
-                {errors.email && <p className="font-body text-xs text-red-500 mt-1">{errors.email}</p>}
+                  className={`input-field w-full px-4 py-3 rounded-xl text-sm ${errors.email ? 'border-red-500' : ''}`} />
+                {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
               </div>
 
               {/* Phone */}
               <div>
-                <label className="font-body text-xs font-medium text-[#4A2C1A] uppercase tracking-wider block mb-1.5">WhatsApp Number *</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>WhatsApp Number *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body text-sm text-[#A89080]">+</span>
-                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="628123456789 or 61412345678"
-                    className={`font-body w-full pl-6 pr-4 py-3 rounded-xl border text-sm text-[#2C1810] placeholder-[#C4A8A0] bg-[#FAFAF8] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30 focus:border-[#C4A35A] transition-all ${errors.phone ? 'border-red-300 bg-red-50' : 'border-[#E8DFD0]'}`} />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#4A5280' }}>+</span>
+                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="628123456789"
+                    className={`input-field w-full pl-6 pr-4 py-3 rounded-xl text-sm ${errors.phone ? 'border-red-500' : ''}`} />
                 </div>
-                <p className="font-body text-xs text-[#A89080] mt-1">Include country code (e.g. 628… Indonesia, 614… Australia, 1… USA)</p>
-                {errors.phone && <p className="font-body text-xs text-red-500 mt-1">{errors.phone}</p>}
+                <p className="text-xs mt-1" style={{ color: '#4A5280' }}>Include country code (628… Indonesia, 614… Australia, 1… USA)</p>
+                {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
               </div>
 
-              {errors.submit && <p className="font-body text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{errors.submit}</p>}
+              {errors.submit && <p className="text-sm text-red-400 rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>{errors.submit}</p>}
 
               <button type="submit" disabled={loading}
-                className="font-body w-full bg-gradient-to-r from-[#C4A35A] to-[#8B6914] text-white font-medium py-4 rounded-xl hover:shadow-lg hover:shadow-[#C4A35A]/30 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:translate-y-0 flex items-center justify-center gap-2">
+                className="btn-primary w-full text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50">
                 {loading ? (
-                  <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Processing…</>
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing…</>
                 ) : (
                   <>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -251,48 +319,67 @@ export default function LandingPage() {
                   </>
                 )}
               </button>
-              <p className="font-body text-center text-xs text-[#A89080]">Your data is safe. We will never spam you.</p>
+              <p className="text-center text-xs" style={{ color: '#4A5280' }}>Your data is safe. We will never spam you.</p>
             </form>
           )}
         </div>
       </section>
 
+      <div className="divider mx-6 mb-16" />
+
       {/* Testimonials */}
       <section className="px-6 pb-16 max-w-4xl mx-auto">
-        <h2 className="font-serif-display text-center text-2xl font-bold text-[#2C1810] mb-2">What Travellers Say</h2>
-        <p className="font-body text-center text-[#8B7355] text-sm mb-8">From 30+ countries around the world</p>
+        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#E8EAF0' }}>What Travellers Say</h2>
+        <p className="text-center text-sm mb-8" style={{ color: '#8B93B8' }}>From 30+ countries around the world</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="bg-white rounded-2xl p-5 border border-[#E8DFD0] shadow-sm">
-              <div className="flex gap-0.5 mb-3">{[1,2,3,4,5].map(i => <span key={i} className="text-[#C4A35A] text-sm">★</span>)}</div>
-              <p className="font-body text-[#4A2C1A] text-xs italic leading-relaxed mb-3">"{t.quote}"</p>
-              <p className="font-body text-[#8B7355] text-xs font-medium">{t.flag} {t.name}</p>
-              <p className="font-body text-[#A89080] text-xs">{t.location}</p>
+            <div key={t.name} className="card rounded-2xl p-5">
+              <div className="flex gap-0.5 mb-3">{[1,2,3,4,5].map(i => <span key={i} className="star-gold text-sm">★</span>)}</div>
+              <p className="text-xs italic leading-relaxed mb-4" style={{ color: '#8B93B8' }}>"{t.quote}"</p>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{t.flag}</span>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: '#C8D0F0' }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: '#4A5280' }}>{t.location}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
+
+      <div className="divider mx-6 mb-16" />
 
       {/* FAQ */}
       <section className="px-6 pb-20 max-w-2xl mx-auto">
-        <h2 className="font-serif-display text-center text-2xl font-bold text-[#2C1810] mb-2">Frequently Asked Questions</h2>
-        <p className="font-body text-center text-[#8B7355] text-sm mb-8">Everything you need to know before you fly</p>
+        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#E8EAF0' }}>Frequently Asked Questions</h2>
+        <p className="text-center text-sm mb-8" style={{ color: '#8B93B8' }}>Everything you need to know before you fly</p>
         <div className="space-y-3">
           {FAQS.map((faq, i) => (
-            <div key={i} className="bg-white border border-[#E8DFD0] rounded-2xl overflow-hidden">
+            <div key={i} className="card rounded-2xl overflow-hidden">
               <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full px-5 py-4 font-body font-semibold text-[#2C1810] text-sm flex justify-between items-center text-left">
-                {faq.q}
-                <span className={`text-[#C4A35A] text-xl transition-transform duration-200 inline-block ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
+                className="w-full px-5 py-4 flex justify-between items-center text-left transition-colors hover:bg-white/5"
+                style={{ color: '#C8D0F0' }}>
+                <span className="text-sm font-semibold">{faq.q}</span>
+                <span className="text-xl transition-transform duration-200 ml-3 flex-shrink-0"
+                  style={{ color: '#2D3F8F', transform: openFaq === i ? 'rotate(45deg)' : 'none' }}>+</span>
               </button>
-              {openFaq === i && <p className="font-body px-5 pb-4 text-sm text-[#6B4C3B] leading-relaxed">{faq.a}</p>}
+              {openFaq === i && (
+                <p className="px-5 pb-4 text-sm leading-relaxed" style={{ color: '#8B93B8', borderTop: '1px solid rgba(27,42,107,0.2)' }}>{faq.a}</p>
+              )}
             </div>
           ))}
         </div>
       </section>
 
-      <footer className="border-t border-[#E8DFD0] py-6 text-center">
-        <p className="font-body text-xs text-[#A89080]">© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>
+      {/* Footer */}
+      <div className="divider mx-6" />
+      <footer className="py-8 text-center">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <Image src="/logo.jpg" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover opacity-60" />
+          <span className="serif text-sm font-bold tracking-widest" style={{ color: '#4A5280' }}>KADO BAJO</span>
+        </div>
+        <p className="text-xs" style={{ color: '#2D3570' }}>© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>
       </footer>
     </div>
   );

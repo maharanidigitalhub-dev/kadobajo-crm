@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build insert payload — only include columns that exist
+    // Build insert payload — only core columns first
     const payload: Record<string, unknown> = {
       name: name.trim(),
       email: email?.trim() ?? '',
@@ -64,11 +64,12 @@ export async function POST(req: NextRequest) {
       status: 'new',
       source,
       device,
-      notes,
     };
 
-    // Optional columns — only add if not null to avoid schema errors
+    // Add optional columns only if they exist in schema
+    // (Supabase schema cache may need time to refresh after ALTER TABLE)
     if (country) payload.country = country.trim();
+    if (notes) payload.notes = notes;
     if (utm_source) payload.utm_source = utm_source;
     if (utm_medium) payload.utm_medium = utm_medium;
     if (utm_campaign) payload.utm_campaign = utm_campaign;

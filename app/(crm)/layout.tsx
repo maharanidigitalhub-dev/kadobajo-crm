@@ -1,70 +1,92 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import LogoutButton from '@/components/crm/LogoutButton';
 
 export default function CRMLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex" style={{ background: '#F8F9FF', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="crm-root">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
-        .serif { font-family: 'Playfair Display', serif; }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        .crm-root { min-height: 100vh; display: flex; background: #F8F9FF; font-family: 'DM Sans', sans-serif; }
+        .crm-serif { font-family: 'Playfair Display', serif; }
+
+        /* Sidebar */
+        .crm-sidebar {
+          width: 240px; background: #fff;
+          border-right: 1.5px solid #E8ECF8;
+          position: fixed; inset-y: 0; left: 0; top: 0; bottom: 0;
+          height: 100vh;
+          display: flex; flex-direction: column; z-index: 30;
+        }
+        .crm-sidebar-logo {
+          padding: 20px;
+          border-bottom: 1.5px solid #E8ECF8;
+          display: flex; align-items: center; gap: 12px;
+        }
+        .crm-logo-img {
+          width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+          box-shadow: 0 2px 8px rgba(45,63,143,0.2); flex-shrink: 0;
+        }
+        .crm-logo-name { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 14px; color: #1B2A6B; line-height: 1; }
+        .crm-logo-sub { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+
+        /* Nav */
+        .crm-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .crm-nav-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 12px; border-radius: 12px;
+          font-size: 14px; color: #6B7280;
+          text-decoration: none; transition: all 0.15s;
+        }
+        .crm-nav-item:hover { color: #1B2A6B; background: #F0F3FD; }
+        .crm-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+        /* Footer */
+        .crm-sidebar-footer { padding: 12px; border-top: 1.5px solid #E8ECF8; }
+
+        /* Main */
+        .crm-main { flex: 1; margin-left: 240px; min-height: 100vh; }
       `}</style>
 
-      {/* Sidebar */}
-      <aside className="w-60 fixed inset-y-0 left-0 z-30 flex flex-col"
-        style={{ background: '#fff', borderRight: '1.5px solid #E8ECF8' }}>
-
+      <aside className="crm-sidebar">
         {/* Logo */}
-        <div className="px-5 py-5" style={{ borderBottom: '1.5px solid #E8ECF8' }}>
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Kado Bajo" width={38} height={38}
-              className="rounded-full object-cover flex-shrink-0"
-              style={{ boxShadow: '0 2px 8px rgba(45,63,143,0.2)' }} />
-            <div>
-              <p className="serif font-semibold text-sm leading-none" style={{ color: '#1B2A6B' }}>Kado Bajo</p>
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>CRM System</p>
-            </div>
+        <div className="crm-sidebar-logo">
+          <img src="/logo.png" alt="Kado Bajo" className="crm-logo-img" />
+          <div>
+            <div className="crm-logo-name">Kado Bajo</div>
+            <div className="crm-logo-sub">CRM System</div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <NavItem href="/dashboard" icon={
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        <nav className="crm-nav">
+          <Link href="/dashboard" className="crm-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-          }>Dashboard</NavItem>
+            Dashboard
+          </Link>
 
-          <NavItem href="/customers" icon={
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          <Link href="/customers" className="crm-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-          }>Customers</NavItem>
+            Customers
+          </Link>
         </nav>
 
         {/* Logout */}
-        <div className="px-3 py-4" style={{ borderTop: '1.5px solid #E8ECF8' }}>
+        <div className="crm-sidebar-footer">
           <LogoutButton />
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 ml-60 min-h-screen">
+      <main className="crm-main">
         {children}
       </main>
     </div>
-  );
-}
-
-function NavItem({ href, icon, children }: { href: string; icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <Link href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
-      style={{ color: '#6B7280' }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#1B2A6B'; (e.currentTarget as HTMLElement).style.background = '#F0F3FD'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#6B7280'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
-      {icon}
-      {children}
-    </Link>
   );
 }

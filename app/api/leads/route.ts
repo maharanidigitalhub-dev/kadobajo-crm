@@ -9,30 +9,42 @@ function detectDevice(ua: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, country, flight_date, notes: userNotes, utm_source, utm_medium, utm_campaign, utm_content } = body;
+    const {
+      name, email, phone, country,
+      flight_date, notes: userNotes,
+      utm_source, utm_medium, utm_campaign, utm_content,
+    } = body;
 
-    if (!name?.trim() || !phone?.trim()) {
-      return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
+    // Validate required
+    if (!name?.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+    if (!phone?.trim()) {
+      return NextResponse.json({ error: 'Phone is required' }, { status: 400 });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
+    // Validate email format
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
+    // Clean phone — remove all non-digits
     const phoneClean = phone.replace(/\D/g, '');
     if (phoneClean.length < 9) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 
-    // Detect device from User-Agent
     const ua = req.headers.get('user-agent') ?? '';
     const device = detectDevice(ua);
+    const source = utm_source ?? 'landing_page';
 
-    // Determine source: prefer UTM source, fallback to landing_page
-    const source = utm_source ? `${utm_source}` : 'landing_page';
+    // Build notes string
+    const notesParts = [];
+    if (flight_date) notesParts.push(`Flight: ${flight_date}`);
+    if (userNotes?.trim()) notesParts.push(userNotes.trim());
+    const notes = notesParts.length > 0 ? notesParts.join(' | ') : null;
 
-    // Check for duplicate phone
+    // Check duplicate phone
     const { data: existing } = await supabase
       .from('customers')
       .select('id', { eq: ['phone', phoneClean] });
@@ -44,65 +56,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const fullPayload = {
+    // Build insert payload — only include columns that exist
+    const payload: Record<string, unknown> = {
       name: name.trim(),
       email: email?.trim() ?? '',
       phone: phoneClean,
-      country: country?.trim() ?? null,
-      city: null,
       status: 'new',
       source,
-      utm_source: utm_source ?? null,
-      utm_medium: utm_medium ?? null,
-      utm_campaign: utm_campaign ?? null,
-      utm_content: utm_content ?? null,
       device,
-      tag: null,
-      notes: userNotes ? `Flight: ${flight_date || "TBD"} | ${userNotes}` : (flight_date ? `Flight: ${flight_date}` : null),
-      value: null,
+      notes,
     };
 
-    const { data: insertedFull, error: fullInsertError } = await supabase
-      .from('customers')
-      .insert(fullPayload);
+    // Optional columns — only add if not null to avoid schema errors
+    if (country) payload.country = country.trim();
+    if (utm_source) payload.utm_source = utm_source;
+    if (utm_medium) payload.utm_medium = utm_medium;
+    if (utm_campaign) payload.utm_campaign = utm_campaign;
+    if (utm_content) payload.utm_content = utm_content;
 
-    if (!fullInsertError) {
-      return NextResponse.json({ success: true, data: insertedFull }, { status: 201 });
+    console.log('[leads] inserting:', JSON.stringify(payload));
+
+    const { data, error } = await supabase.from('customers').insert(payload);
+
+    if (error) {
+      console.error('[leads] Supabase error:', JSON.stringify(error));
+      return NextResponse.json(
+        { error: 'Failed to save lead', detail: error.message },
+        { status: 500 }
+      );
     }
 
-    const isSchemaColumnError =
-      fullInsertError.code === '42703' ||
-      /column .* does not exist|schema cache/i.test(fullInsertError.message);
+    console.log('[leads] success:', data);
+    return NextResponse.json({ success: true, data }, { status: 201 });
 
-    if (!isSchemaColumnError) {
-      console.error('Supabase error:', fullInsertError);
-      return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
-    }
-
-    // Fallback for legacy schemas that don't have UTM / country / device fields yet.
-    const minimalPayload = {
-      name: name.trim(),
-      email: email?.trim() ?? '',
-      phone: phoneClean,
-      status: 'new',
-      source,
-      tag: null,
-      notes: null,
-      value: null,
-    };
-
-    const { data: insertedMinimal, error: minimalInsertError } = await supabase
-      .from('customers')
-      .insert(minimalPayload);
-
-    if (minimalInsertError) {
-      console.error('Supabase error:', minimalInsertError);
-      return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data: insertedMinimal }, { status: 201 });
   } catch (err) {
-    console.error('API error:', err);
+    console.error('[leads] API error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

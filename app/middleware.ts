@@ -1,52 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_HOSTNAME = 'admin.kadobajo.id';
-
-// Admin routes that require auth
-const ADMIN_PROTECTED = ['/dashboard', '/customers'];
-// Admin-only routes (inaccessible from main domain)
-const ADMIN_ROUTES = ['/dashboard', '/customers', '/login'];
+function isAdminDomain(req: NextRequest): boolean {
+  // Check multiple sources for the hostname
+  const host =
+    req.headers.get('x-forwarded-host') ||
+    req.headers.get('host') ||
+    req.nextUrl.hostname ||
+    '';
+  return host.includes('admin.');
+}
 
 export function middleware(req: NextRequest) {
-  const { pathname, hostname } = req.nextUrl;
-  const host = req.headers.get('host') ?? hostname;
-  const isAdminDomain = host === ADMIN_HOSTNAME || host.startsWith('admin.');
+  const { pathname } = req.nextUrl;
   const auth = req.cookies.get('auth')?.value;
+  const adminDomain = isAdminDomain(req);
 
-  // ── MAIN DOMAIN (kadobajo.id) ──
-  if (!isAdminDomain) {
-    // Block access to admin routes from main domain → redirect to admin subdomain
-    if (ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
-      return NextResponse.redirect(`https://${ADMIN_HOSTNAME}${pathname}`);
+  // ── ADMIN DOMAIN (admin.kadobajo.id) ──
+  if (adminDomain) {
+    // Root → redirect to dashboard or login
+    if (pathname === '/') {
+      return NextResponse.redirect(
+        new URL(auth === 'true' ? '/dashboard' : '/login', req.url)
+      );
     }
+
+    // Protected admin routes → require auth
+    if (
+      (pathname.startsWith('/dashboard') || pathname.startsWith('/customers')) &&
+      auth !== 'true'
+    ) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+
+    // Already logged in → skip login
+    if (pathname === '/login' && auth === 'true') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
     return NextResponse.next();
   }
 
-  // ── ADMIN DOMAIN (admin.kadobajo.id) ──
+  // ── MAIN DOMAIN (kadobajo.id) ──
 
-  // Root → redirect to dashboard or login
-  if (pathname === '/') {
-    return NextResponse.redirect(
-      new URL(auth === 'true' ? '/dashboard' : '/login', req.url)
-    );
-  }
-
-  // Protected routes → require auth
-  if (ADMIN_PROTECTED.some(r => pathname.startsWith(r)) && auth !== 'true') {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  // Already logged in → skip login page
-  if (pathname === '/login' && auth === 'true') {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  // Landing page on admin domain → redirect to dashboard/login
-  // (admin subdomain should only serve admin UI)
-  if (pathname === '/') {
-    return NextResponse.redirect(
-      new URL(auth === 'true' ? '/dashboard' : '/login', req.url)
-    );
+  // Redirect admin routes to admin subdomain
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/customers')
+  ) {
+    const adminUrl = new URL(req.url);
+    adminUrl.hostname = 'admin.kadobajo.id';
+    adminUrl.host = 'admin.kadobajo.id';
+    return NextResponse.redirect(adminUrl.toString());
   }
 
   return NextResponse.next();
@@ -54,12 +59,6 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * - _next/static, _next/image (Next.js internals)
-     * - favicon.ico, public files
-     * - API routes (handled separately)
-     */
     '/((?!_next/static|_next/image|favicon.ico|logo.png|api/).*)',
   ],
 };

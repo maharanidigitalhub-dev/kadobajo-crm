@@ -59,7 +59,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="pulse inline-block rounded-full mb-4">
-            <Image src="/logo.jpg" alt="Kado Bajo" width={80} height={80}
+            <Image src="/logo.png" alt="Kado Bajo" width={80} height={80}
               className="rounded-full object-cover"
               style={{ border: '3px solid rgba(27,42,107,0.7)', filter: 'drop-shadow(0 0 20px rgba(27,42,107,0.6))' }} />
           </div>

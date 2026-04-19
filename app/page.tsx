@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import Link from 'next/link';
 
 const WHATSAPP_NUMBER = '6281234567890';
@@ -358,7 +359,7 @@ export default function LandingPage() {
       <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}
         className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center gap-3">
-          <Image
+          <NextImage
             src="/logo.png"
             alt="Kado Bajo"
             width={48}
@@ -371,13 +372,17 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── 2. HERO ── */}
-      <section className="hero">
-        <div className="hero-logo">
-          <div className="logo-float">
-            <div className="logo-pulse">
-              <img src="/logo.png" alt="Kado Bajo Logo" style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 8px 32px rgba(45,63,143,0.25)' }} />
-            </div>
+      {/* Hero */}
+      <section className="pt-32 pb-16 px-6 text-center relative overflow-hidden">
+        {/* Subtle background accent */}
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(ellipse, rgba(45,63,143,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        {/* Logo */}
+        <div className="animate-float inline-block mb-8">
+          <div className="pulse" style={{ borderRadius: '50%', display: 'inline-block' }}>
+            <NextImage src="/logo.png" alt="Kado Bajo Logo" width={110} height={110}
+              className="rounded-full object-cover"
+              style={{ boxShadow: '0 8px 32px rgba(45,63,143,0.25)' }} />
           </div>
         </div>
 
@@ -406,17 +411,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── 3. TRUST BAR ── */}
-      <div className="trust-bar">
-        <div className="trust-bar-inner">
-          {[
-            { icon: '🌍', text: '30+ Countries', sub: 'Trusted by travellers worldwide' },
-            { icon: '⭐', text: '5-Star Rated', sub: 'Tripadvisor & Google' },
-            { icon: '✈️', text: 'Right at Komodo Airport', sub: 'Before check-in counters' },
-            { icon: '🎁', text: 'Personal Shopper — Free', sub: 'No other souvenir shop has this' },
-          ].map(t => (
-            <div key={t.text} className="trust-item">
-              <span className="trust-icon">{t.icon}</span>
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8ECF8, transparent)', margin: '0 24px 48px' }} />
+
+      {/* Lead Form */}
+      <section className="px-6 pb-16 max-w-lg mx-auto">
+        <div className="rounded-3xl overflow-hidden" style={{ border: '1.5px solid #E8ECF8', boxShadow: '0 8px 40px rgba(45,63,143,0.12)' }}>
+          {/* Card header — navy, logo tetap */}
+          <div style={{ background: 'linear-gradient(135deg, #1B2A6B, #2D3F8F)', padding: '28px 32px' }}>
+            <div className="flex items-center gap-3">
+              <NextImage src="/logo.png" alt="Kado Bajo" width={44} height={44} className="rounded-full object-cover flex-shrink-0"
+                style={{ boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
               <div>
                 <div className="trust-text">{t.text}</div>
                 <div className="trust-sub">{t.sub}</div>
@@ -670,53 +674,14 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* ── 12. FINAL CTA ── */}
-      <div className="section-sm">
-        <div className="final-cta">
-          <h2>Don't Leave Komodo Empty-Handed</h2>
-          <p>Tell us your flight date. We'll prepare your order and have it waiting at Komodo Airport — perfectly packed and ready to go.</p>
-          <button className="final-cta-btn" onClick={scrollToForm}>
-            Order Now &amp; Pick Up at the Airport →
-          </button>
-          <div className="final-trust">✓ Free packing &amp; gift wrap &nbsp;·&nbsp; ✓ Personal shopper included &nbsp;·&nbsp; ✓ All major cards accepted</div>
-        </div>
-      </div>
-
-      {/* ── 13. FOOTER ── */}
-      <footer className="footer">
-        <div className="footer-inner">
-          <div>
-            <div className="footer-logo">
-              <img src="/logo.png" alt="Kado Bajo" />
-              <span>Kado Bajo</span>
-            </div>
-            <div className="footer-text">The most complete NTT souvenir experience, right at Komodo Airport.</div>
-          </div>
-          <div>
-            <div className="footer-title">Store Address</div>
-            <div className="footer-text">Jl. Yohanes Sehadun, Labuan Bajo<br />Depan Bandara Komodo, NTT</div>
-          </div>
-          <div>
-            <div className="footer-title">Contact Us</div>
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="footer-wa">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-              WhatsApp Us
-            </a>
-            <div className="footer-socials">
-              <a href="#" target="_blank" rel="noreferrer" className="footer-social">Instagram</a>
-              <a href="#" target="_blank" rel="noreferrer" className="footer-social">TikTok</a>
-            </div>
-          </div>
-          <div>
-            <div className="footer-title">Legal</div>
-            <a href="#" className="footer-legal footer-text">Privacy Policy</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span className="footer-copy">© 2026 Kado Bajo · Labuan Bajo, Flores, NTT</span>
-          <a href="#" className="footer-legal">Privacy Policy</a>
+      {/* Footer */}
+      <div style={{ height: 1, background: '#F3F4F6', margin: '0 24px' }} />
+      <footer className="py-8 text-center" style={{ background: '#fff' }}>
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <NextImage src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover" style={{ opacity: 0.8 }} />
+          <span className="serif text-sm font-bold tracking-widest" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
         </div>
       </footer>
     </div>

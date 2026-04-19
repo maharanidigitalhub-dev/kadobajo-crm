@@ -10,6 +10,14 @@ async function selectCustomersWithFallback(limit?: number): Promise<Customer[]> 
     return ordered.data as Customer[];
   }
 
+  const canFallbackLegacyCreatedAt = Boolean(
+    ordered.error && /created_at|column .* does not exist|schema cache/i.test(ordered.error.message)
+  );
+
+  if (!canFallbackLegacyCreatedAt) {
+    throw new Error(ordered.error?.message ?? 'Failed to load customers');
+  }
+
   // Fallback for legacy schemas that do not have created_at yet.
   const fallback = await supabase
     .from('customers')

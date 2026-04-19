@@ -1,28 +1,26 @@
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-const SUPABASE_SERVER_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ??
-  process.env.SUPABASE_ANON_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  '';
+
+const SUPABASE_KEYS = [
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_ANON_KEY,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+].filter((v): v is string => Boolean(v && v.trim()));
 
 interface SupabaseResponse<T> {
   data: T | null;
   error: { message: string; code?: string } | null;
 }
 
-async function supabaseRequest<T>(
+async function requestWithKey<T>(
   path: string,
+  key: string,
   options: RequestInit = {}
 ): Promise<SupabaseResponse<T>> {
-  if (!SUPABASE_URL || !SUPABASE_SERVER_KEY) {
-    return { data: null, error: { message: 'Supabase env vars not configured' } };
-  }
-
   const url = `${SUPABASE_URL}/rest/v1${path}`;
   const headers: Record<string, string> = {
-    apikey: SUPABASE_SERVER_KEY,
-    Authorization: `Bearer ${SUPABASE_SERVER_KEY}`,
+    apikey: key,
+    Authorization: `Bearer ${key}`,
     'Content-Type': 'application/json',
     Prefer: 'return=representation',
     ...(options.headers as Record<string, string>),
@@ -40,6 +38,35 @@ async function supabaseRequest<T>(
   } catch (e: unknown) {
     return { data: null, error: { message: e instanceof Error ? e.message : 'Unknown error' } };
   }
+}
+
+async function supabaseRequest<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<SupabaseResponse<T>> {
+  if (!SUPABASE_URL || SUPABASE_KEYS.length === 0) {
+    return { data: null, error: { message: 'Supabase env vars not configured' } };
+  }
+
+  let lastError: SupabaseResponse<T>['error'] = null;
+
+  for (const key of SUPABASE_KEYS) {
+    const response = await requestWithKey<T>(path, key, options);
+    if (!response.error) {
+      return response;
+    }
+    lastError = response.error;
+
+    // Stop retrying on non-auth errors.
+    if (response.error.code && !['PGRST301', '401', '403'].includes(response.error.code)) {
+      break;
+    }
+    if (!/(unauthorized|jwt|invalid api key|permission denied|forbidden)/i.test(response.error.message)) {
+      break;
+    }
+  }
+
+  return { data: null, error: lastError ?? { message: 'Unknown Supabase error' } };
 }
 
 export const supabase = {

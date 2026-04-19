@@ -28,11 +28,14 @@ export default async function DashboardPage() {
   let all: Customer[] = [];
   let recent: Customer[] = [];
   let fetchError = false;
+  let fetchErrorMessage = "";
 
   try {
     [all, recent] = await Promise.all([getAllCustomers(), getRecentCustomers(5)]);
-  } catch {
+  } catch (error) {
     fetchError = true;
+    fetchErrorMessage = error instanceof Error ? error.message : "Unknown database error";
+    console.error('Dashboard fetch error:', error);
   }
 
   const counts = countByStatus(all);
@@ -68,6 +71,11 @@ export default async function DashboardPage() {
           <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
             Periksa environment variables NEXT_PUBLIC_SUPABASE_URL + SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY (minimal) atau SUPABASE_SERVICE_ROLE_KEY (recommended) di Vercel, lalu redeploy.
           </p>
+          {fetchErrorMessage && (
+            <p className="text-xs mt-2 font-mono break-all" style={{ color: '#9CA3AF' }}>
+              Detail: {fetchErrorMessage}
+            </p>
+          )}
         </div>
       )}
 

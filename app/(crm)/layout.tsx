@@ -17,7 +17,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(27,42,107,0.3)' }}>
           <div className="flex items-center gap-3">
-            <Image src="/logo.jpg" alt="Kado Bajo" width={38} height={38}
+            <Image src="/logo.png" alt="Kado Bajo" width={38} height={38}
               className="rounded-full object-cover flex-shrink-0"
               style={{ border: '2px solid rgba(27,42,107,0.7)', filter: 'drop-shadow(0 0 8px rgba(27,42,107,0.5))' }} />
             <div>

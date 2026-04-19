@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,88 +35,79 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1A0E08] flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0A0E1A', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+        .serif { font-family: 'Playfair Display', serif; }
+        .input-field {
+          background: rgba(10,14,26,0.8);
+          border: 1px solid rgba(27,42,107,0.4);
+          color: #E8EAF0;
+          transition: all 0.2s;
+        }
+        .input-field:focus { outline: none; border-color: #2D3F8F; box-shadow: 0 0 0 3px rgba(27,42,107,0.2); }
+        .input-field::placeholder { color: rgba(139,147,184,0.4); }
+        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(27,42,107,0.4)} 70%{box-shadow:0 0 0 20px rgba(27,42,107,0)} 100%{box-shadow:0 0 0 0 rgba(27,42,107,0)} }
+        .pulse { animation: pulse-ring 2.5s ease infinite; }
       `}</style>
 
-      {/* Background glow */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#C4A35A]/5 blur-[100px]" />
-      </div>
+      {/* Background */}
+      <div style={{ position:'fixed', inset:0, backgroundImage:'radial-gradient(rgba(27,42,107,0.06) 1px, transparent 1px)', backgroundSize:'40px 40px', pointerEvents:'none' }} />
+      <div style={{ position:'fixed', top:'30%', left:'50%', transform:'translateX(-50%)', width:'500px', height:'500px', background:'radial-gradient(circle, rgba(27,42,107,0.12) 0%, transparent 70%)', pointerEvents:'none' }} />
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#C4A35A] to-[#8B6914] flex items-center justify-center shadow-2xl shadow-[#C4A35A]/30">
-            <span className="text-2xl">🎁</span>
+          <div className="pulse inline-block rounded-full mb-4">
+            <Image src="/logo.jpg" alt="Kado Bajo" width={80} height={80}
+              className="rounded-full object-cover"
+              style={{ border: '3px solid rgba(27,42,107,0.7)', filter: 'drop-shadow(0 0 20px rgba(27,42,107,0.6))' }} />
           </div>
-          <h1 className="text-white text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Kado Bajo
-          </h1>
-          <p className="text-[#8B7355] text-sm mt-1" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            Admin CRM Dashboard
-          </p>
+          <h1 className="serif font-bold text-2xl" style={{ color: '#E8EAF0' }}>Kado Bajo</h1>
+          <p className="text-sm mt-1" style={{ color: '#4A5280' }}>Admin CRM Dashboard</p>
         </div>
 
-        {/* Form card */}
-        <div className="bg-[#261610] border border-[#3D2515] rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-[#E8C88A] text-lg font-semibold mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Masuk ke Dashboard
-          </h2>
+        {/* Card */}
+        <div style={{ background: '#0F1528', border: '1px solid rgba(27,42,107,0.4)', borderRadius: 20, padding: '32px', boxShadow: '0 0 60px rgba(27,42,107,0.25)' }}>
+          <h2 className="serif font-semibold text-lg mb-6" style={{ color: '#8B93B8' }}>Masuk ke Dashboard</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#8B7355] uppercase tracking-wider mb-1.5" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="admin@kadobajo.com"
-                autoComplete="email"
-                className="w-full px-4 py-3 bg-[#1A0E08] border border-[#3D2515] rounded-xl text-[#E8DFD0] placeholder-[#5A4030] text-sm focus:outline-none focus:border-[#C4A35A] focus:ring-1 focus:ring-[#C4A35A]/30 transition-all"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
-              />
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A5280' }}>Email</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="admin@kadobajo.com" autoComplete="email"
+                className="input-field w-full px-4 py-3 rounded-xl text-sm" />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#8B7355] uppercase tracking-wider mb-1.5" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••"
-                autoComplete="current-password"
-                className="w-full px-4 py-3 bg-[#1A0E08] border border-[#3D2515] rounded-xl text-[#E8DFD0] placeholder-[#5A4030] text-sm focus:outline-none focus:border-[#C4A35A] focus:ring-1 focus:ring-[#C4A35A]/30 transition-all"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
-              />
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A5280' }}>Password</label>
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="••••••" autoComplete="current-password"
+                className="input-field w-full px-4 py-3 rounded-xl text-sm" />
             </div>
 
             {error && (
-              <div className="bg-red-900/20 border border-red-800/40 rounded-xl px-4 py-3">
-                <p className="text-red-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>{error}</p>
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px' }}>
+                <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-[#C4A35A] to-[#8B6914] text-white font-medium py-3 rounded-xl hover:shadow-lg hover:shadow-[#C4A35A]/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:translate-y-0 mt-2 flex items-center justify-center gap-2"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}
-            >
+            <button type="submit" disabled={loading}
+              className="w-full text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 mt-2 transition-all"
+              style={{ background: 'linear-gradient(135deg, #2D3F8F, #1B2A6B)', border: '1px solid rgba(45,63,143,0.5)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'linear-gradient(135deg, #3D52B0, #2D3F8F)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'linear-gradient(135deg, #2D3F8F, #1B2A6B)')}>
               {loading ? (
-                <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Masuk…</>
+                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Masuk…</>
               ) : 'Masuk'}
             </button>
           </form>
         </div>
 
         <div className="text-center mt-6">
-          <Link href="/" className="text-[#5A4030] text-xs hover:text-[#8B7355] transition-colors" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          <Link href="/" className="text-xs transition-colors" style={{ color: '#2D3570' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#8B93B8')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#2D3570')}>
             ← Kembali ke Landing Page
           </Link>
         </div>

@@ -4,7 +4,7 @@ import LogoutButton from '@/components/crm/LogoutButton';
 
 export default function CRMLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex" style={{ background: '#0D1120', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex" style={{ background: '#F8F9FF', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
         .serif { font-family: 'Playfair Display', serif; }
@@ -12,17 +12,17 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside className="w-60 fixed inset-y-0 left-0 z-30 flex flex-col"
-        style={{ background: '#080C18', borderRight: '1px solid rgba(27,42,107,0.3)' }}>
+        style={{ background: '#fff', borderRight: '1.5px solid #E8ECF8' }}>
 
         {/* Logo */}
-        <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(27,42,107,0.3)' }}>
+        <div className="px-5 py-5" style={{ borderBottom: '1.5px solid #E8ECF8' }}>
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="Kado Bajo" width={38} height={38}
               className="rounded-full object-cover flex-shrink-0"
-              style={{ border: '2px solid rgba(27,42,107,0.7)', filter: 'drop-shadow(0 0 8px rgba(27,42,107,0.5))' }} />
+              style={{ boxShadow: '0 2px 8px rgba(45,63,143,0.2)' }} />
             <div>
-              <p className="serif font-semibold text-sm leading-none" style={{ color: '#C8D0F0' }}>Kado Bajo</p>
-              <p className="text-xs mt-0.5" style={{ color: '#2D3570' }}>CRM System</p>
+              <p className="serif font-semibold text-sm leading-none" style={{ color: '#1B2A6B' }}>Kado Bajo</p>
+              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>CRM System</p>
             </div>
           </div>
         </div>
@@ -43,7 +43,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Logout */}
-        <div className="px-3 py-4" style={{ borderTop: '1px solid rgba(27,42,107,0.3)' }}>
+        <div className="px-3 py-4" style={{ borderTop: '1.5px solid #E8ECF8' }}>
           <LogoutButton />
         </div>
       </aside>
@@ -59,11 +59,11 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 function NavItem({ href, icon, children }: { href: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <Link href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group"
-      style={{ color: '#4A5280' }}
-      onMouseEnter={e => { e.currentTarget.style.color = '#C8D0F0'; e.currentTarget.style.background = 'rgba(27,42,107,0.2)'; }}
-      onMouseLeave={e => { e.currentTarget.style.color = '#4A5280'; e.currentTarget.style.background = 'transparent'; }}>
-      <span style={{ color: '#2D3570' }}>{icon}</span>
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+      style={{ color: '#6B7280' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#1B2A6B'; (e.currentTarget as HTMLElement).style.background = '#F0F3FD'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#6B7280'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+      {icon}
       {children}
     </Link>
   );

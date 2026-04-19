@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 
 const WHATSAPP_NUMBER = '6281234567890';
 
@@ -127,7 +126,6 @@ export default function LandingPage() {
         </a>
         <div className="nav-right">
           <button className="hero-cta nav-cta" onClick={scrollToForm}>Order Now →</button>
-          <Link href="https://admin.kadobajo.id/login" className="nav-admin">Admin</Link>
         </div>
       </nav>
 

@@ -39,7 +39,7 @@
 .d1         { animation-delay: 0.1s;  opacity: 0; }
 .d2         { animation-delay: 0.25s; opacity: 0; }
 .d3         { animation-delay: 0.4s;  opacity: 0; }
-.logo-pulse { animation: pulseRing 2.5s ease infinite; border-radius: 50%; display: inline-block; }
+.logo-pulse { animation: pulseRing 2.5s ease infinite; border-radius: 50%; display: block; margin: 0 auto; width: fit-content; }
 .logo-float { animation: float 5s ease-in-out infinite; display: inline-block; }
 
 /* ── NAVBAR ── */
@@ -298,10 +298,10 @@
 /* ── LOGIN PAGE (admin.kadobajo.id/login) ── */
 .login-root  { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:#F8F9FF; }
 .login-wrap  { width:100%; max-width:380px; position:relative; }
-.login-logo  { text-align:center; margin-bottom:32px; }
-.login-logo img  { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow:0 8px 24px rgba(45,63,143,0.2); }
-.login-logo h1   { font-family:'Playfair Display',serif; font-size:22px; color:#111827; margin-top:14px; }
-.login-logo p    { font-size:13px; color:#9CA3AF; margin-top:4px; }
+.login-logo  { text-align:center; margin-bottom:36px; display:flex; flex-direction:column; align-items:center; }
+.login-logo img  { width:120px; height:120px; border-radius:50%; object-fit:cover; box-shadow:0 12px 40px rgba(45,63,143,0.25); display:block; margin:0 auto; }
+.login-logo h1   { font-family:'Playfair Display',serif; font-size:24px; color:#111827; margin-top:18px; }
+.login-logo p    { font-size:14px; color:#9CA3AF; margin-top:6px; }
 .login-card      { background:white; border:1.5px solid var(--border-light); border-radius:20px; padding:32px; box-shadow:0 8px 40px rgba(45,63,143,0.08); }
 .login-card-title { font-size:17px; color:#374151; margin-bottom:24px; }
 .login-field { margin-bottom:16px; }

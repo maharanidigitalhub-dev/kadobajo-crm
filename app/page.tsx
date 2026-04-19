@@ -120,7 +120,7 @@ export default function LandingPage() {
 
   return (
     /*<div style={{ background: '#fff', fontFamily: "'DM Sans', sans-serif", color: '#1a1209', minHeight: '100vh' }}>*/
-      <style>{`
+      <style>{'
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .serif { font-family: 'Playfair Display', serif; }
@@ -353,7 +353,7 @@ export default function LandingPage() {
         .footer-copy { font-size: 12px; color: #9CA3AF; }
         .footer-legal { font-size: 12px; color: #9CA3AF; text-decoration: none; }
         .footer-legal:hover { color: var(--navy); }
-      `}</style>
+      '}</style>
 
       {/* Nav */}
       <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type HeroData = {
   title: string;
@@ -20,11 +20,27 @@ const defaultHero: HeroData = {
 
 export default function AdminCmsPage() {
   const [form, setForm] = useState<HeroData>(defaultHero);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [localPreview, setLocalPreview] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const previewImage = useMemo(() => form.image.trim(), [form.image]);
+  const previewImage = localPreview || form.image.trim();
+
+  useEffect(() => {
+    if (!imageFile) {
+      setLocalPreview('');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(imageFile);
+    setLocalPreview(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [imageFile]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,33 +88,45 @@ export default function AdminCmsPage() {
 
     const title = form.title.trim();
     const subtitle = form.subtitle.trim();
-    const image = form.image.trim();
+    const currentImage = form.image.trim();
 
-    if (!title || !subtitle || !image) {
-      setError('Title, subtitle, dan image URL wajib diisi.');
+    if (!title || !subtitle) {
+      setError('Title dan subtitle wajib diisi.');
+      return;
+    }
+
+    if (!imageFile && !currentImage) {
+      setError('Upload image wajib diisi.');
       return;
     }
 
     setSaving(true);
 
     try {
+      const payload = new FormData();
+      payload.append('key', 'homepage');
+      payload.append('title', title);
+      payload.append('subtitle', subtitle);
+      payload.append('currentImage', currentImage);
+      if (imageFile) {
+        payload.append('image', imageFile);
+      }
+
       const response = await fetch('/api/cms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: 'homepage',
-          data: {
-            hero: { title, subtitle, image },
-          },
-        }),
+        body: payload,
       });
 
-      const json = (await response.json()) as { error?: string };
+      const json = (await response.json()) as { data?: HomepageData; error?: string };
 
       if (!response.ok) {
         throw new Error(json.error ?? 'Gagal menyimpan CMS.');
       }
 
+      if (json.data?.hero?.image) {
+        setForm((prev) => ({ ...prev, image: json.data?.hero?.image ?? prev.image }));
+      }
+      setImageFile(null);
       window.alert('CMS berhasil disimpan.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal menyimpan CMS.');
@@ -150,17 +178,19 @@ export default function AdminCmsPage() {
 
           <div>
             <label htmlFor="image" className="mb-1 block text-sm font-medium text-slate-700">
-              Image URL
+              Upload Image
             </label>
             <input
               id="image"
-              type="url"
-              value={form.image}
-              onChange={(event) => setForm((prev) => ({ ...prev, image: event.target.value }))}
+              type="file"
+              accept="image/*"
+              onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
-              placeholder="https://..."
               disabled={saving}
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Upload file gambar baru. Jika tidak diisi, gambar lama tetap dipakai.
+            </p>
           </div>
 
           {previewImage ? (

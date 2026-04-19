@@ -7,6 +7,7 @@ type CmsData = {
 };
 
 const cmsFilePath = path.join(process.cwd(), 'data', 'cms.json');
+const uploadDirPath = path.join(process.cwd(), 'public', 'uploads', 'cms');
 
 async function readCmsFile(): Promise<CmsData> {
   const raw = await fs.readFile(cmsFilePath, 'utf-8');
@@ -40,19 +41,51 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { key?: string; data?: unknown };
-    const key = body.key?.trim();
+    const formData = await request.formData();
+    const key = String(formData.get('key') ?? '').trim();
+    const title = String(formData.get('title') ?? '').trim();
+    const subtitle = String(formData.get('subtitle') ?? '').trim();
+    const currentImage = String(formData.get('currentImage') ?? '').trim();
+    const imageFile = formData.get('image');
 
     if (!key) {
       return NextResponse.json({ error: 'Field "key" is required.' }, { status: 400 });
     }
 
-    if (typeof body.data === 'undefined') {
-      return NextResponse.json({ error: 'Field "data" is required.' }, { status: 400 });
+    if (!title || !subtitle) {
+      return NextResponse.json({ error: 'Field "title" and "subtitle" are required.' }, { status: 400 });
+    }
+
+    let imagePath = currentImage;
+
+    if (imageFile instanceof File && imageFile.size > 0) {
+      if (!imageFile.type.startsWith('image/')) {
+        return NextResponse.json({ error: 'Uploaded file must be an image.' }, { status: 400 });
+      }
+
+      await fs.mkdir(uploadDirPath, { recursive: true });
+
+      const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '-').toLowerCase();
+      const fileName = `${Date.now()}-${safeName}`;
+      const targetPath = path.join(uploadDirPath, fileName);
+      const fileBuffer = Buffer.from(await imageFile.arrayBuffer());
+
+      await fs.writeFile(targetPath, fileBuffer);
+      imagePath = `/uploads/cms/${fileName}`;
+    }
+
+    if (!imagePath) {
+      return NextResponse.json({ error: 'Image is required.' }, { status: 400 });
     }
 
     const cms = await readCmsFile();
-    cms[key] = body.data;
+    cms[key] = {
+      hero: {
+        title,
+        subtitle,
+        image: imagePath,
+      },
+    };
 
     await writeCmsFile(cms);
 

@@ -354,15 +354,20 @@ export default function LandingPage() {
         .footer-legal:hover { color: var(--navy); }
       `}</style>
 
-      {/* ── 1. NAVBAR ── */}
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-        <a href="#" className="nav-logo">
-          <img src="/logo.png" alt="Kado Bajo" />
-          <span>Kado Bajo</span>
-        </a>
-        <div className="nav-right">
-          <button className="hero-cta nav-cta" onClick={scrollToForm}>Order Now →</button>
-          <Link href="/login" className="nav-admin">Admin</Link>
+      {/* Nav */}
+      <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}
+        className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="Kado Bajo"
+            width={48}
+            height={48}
+            className="rounded-full object-cover w-10 h-10 sm:w-12 sm:h-12"
+          />
+          <span className="serif font-bold tracking-widest text-sm sm:text-base uppercase" style={{ color: '#1B2A6B' }}>
+            KADO BAJO
+          </span>
         </div>
       </nav>
 

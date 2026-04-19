@@ -125,6 +125,7 @@ export default function LandingPage() {
           <img src="/logo.png" alt="Kado Bajo" />
           <span>Kado Bajo</span>
         </a>
+      </nav>
 
       {/* ── 2. HERO ── */}
       <section className="hero">

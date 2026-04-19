@@ -20,7 +20,8 @@ export function middleware(req: NextRequest) {
   // Protect dashboard & customers
   if (
     (pathname.startsWith('/admin/dashboard') ||
-      pathname.startsWith('/admin/customers')) &&
+      pathname.startsWith('/admin/customers') ||
+      pathname.startsWith('/admin/cms')) &&
     auth !== 'true'
   ) {
     return NextResponse.redirect(new URL('/admin/login', req.url));

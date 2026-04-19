@@ -69,6 +69,14 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
             Dashboard
           </Link>
 
+          <Link href="/cms" className="crm-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v13a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 15H5V9h14v10zM7 11h5v5H7v-5z" />
+            </svg>
+            CMS
+          </Link>
+
           <Link href="/customers" className="crm-nav-item">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import Link from 'next/link';
 
 const WHATSAPP_NUMBER = '6281234567890';
@@ -105,7 +105,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
-      <style>{`
+      <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
         .serif { font-family: 'Playfair Display', serif; }
 
@@ -127,10 +127,18 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}
-        className="flex justify-between items-center px-6 py-4">
+        className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" />
-          <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
+          <NextImage
+            src="/logo.png"
+            alt="Kado Bajo"
+            width={48}
+            height={48}
+            className="rounded-full object-cover w-10 h-10 sm:w-12 sm:h-12"
+          />
+          <span className="serif font-bold tracking-widest text-sm sm:text-base uppercase" style={{ color: '#1B2A6B' }}>
+            KADO BAJO
+          </span>
         </div>
         <Link href="/login"
           className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"
@@ -149,7 +157,7 @@ export default function LandingPage() {
         {/* Logo */}
         <div className="animate-float inline-block mb-8">
           <div className="pulse" style={{ borderRadius: '50%', display: 'inline-block' }}>
-            <Image src="/logo.png" alt="Kado Bajo Logo" width={110} height={110}
+            <NextImage src="/logo.png" alt="Kado Bajo Logo" width={110} height={110}
               className="rounded-full object-cover"
               style={{ boxShadow: '0 8px 32px rgba(45,63,143,0.25)' }} />
           </div>
@@ -214,7 +222,7 @@ export default function LandingPage() {
           {/* Card header — navy, logo tetap */}
           <div style={{ background: 'linear-gradient(135deg, #1B2A6B, #2D3F8F)', padding: '28px 32px' }}>
             <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="Kado Bajo" width={44} height={44} className="rounded-full object-cover flex-shrink-0"
+              <NextImage src="/logo.png" alt="Kado Bajo" width={44} height={44} className="rounded-full object-cover flex-shrink-0"
                 style={{ boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
               <div>
                 <h2 className="serif text-white text-lg font-bold leading-tight">Your Last Stop Before Departure</h2>
@@ -372,7 +380,7 @@ export default function LandingPage() {
       <div style={{ height: 1, background: '#F3F4F6', margin: '0 24px' }} />
       <footer className="py-8 text-center" style={{ background: '#fff' }}>
         <div className="flex items-center justify-center gap-3 mb-3">
-          <Image src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover" style={{ opacity: 0.8 }} />
+          <NextImage src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover" style={{ opacity: 0.8 }} />
           <span className="serif text-sm font-bold tracking-widest" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
         </div>
         <p className="text-xs" style={{ color: '#9CA3AF' }}>© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>

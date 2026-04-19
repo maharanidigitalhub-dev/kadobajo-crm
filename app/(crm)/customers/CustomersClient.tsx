@@ -20,6 +20,29 @@ const SOURCE_OPTIONS = [
   { value: 'google', label: 'Google' },
   { value: 'tiktok', label: 'TikTok' },
   { value: 'landing_page', label: 'Direct / Organic' },
+  { value: 'manual_dashboard', label: 'Manual (Dashboard)' },
+];
+
+const COUNTRIES = [
+  { code: 'AU', name: 'Australia' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'CN', name: 'China' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'OTHER', name: 'Other' },
 ];
 
 // Meta Custom Audience format
@@ -97,6 +120,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [filterCountry, setFilterCountry] = useState('');
   const [search, setSearch] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [manualForm, setManualForm] = useState({ name: '', email: '', phone: '', country: '' });
+  const [manualErrors, setManualErrors] = useState<Record<string, string>>({});
+  const [manualLoading, setManualLoading] = useState(false);
 
   // Unique countries from data
   const countries = useMemo(() => {
@@ -119,6 +146,62 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     setCustomers((prev) => prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)));
   }
 
+  function validateManualForm() {
+    const errs: Record<string, string> = {};
+    if (!manualForm.name.trim()) errs.name = 'Name is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (manualForm.email && !emailRegex.test(manualForm.email)) errs.email = 'Invalid email';
+    const cleanPhone = manualForm.phone.replace(/\D/g, '');
+    if (!cleanPhone) errs.phone = 'Phone is required';
+    else if (cleanPhone.length < 9) errs.phone = 'Invalid phone number';
+    return errs;
+  }
+
+  async function handleCreateManualCustomer(e: React.FormEvent) {
+    e.preventDefault();
+    const errs = validateManualForm();
+    if (Object.keys(errs).length > 0) {
+      setManualErrors(errs);
+      return;
+    }
+
+    setManualErrors({});
+    setManualLoading(true);
+    try {
+      const payload = {
+        ...manualForm,
+        utm_source: 'manual_dashboard',
+        utm_medium: 'manual_input',
+        utm_campaign: null,
+        utm_content: null,
+      };
+
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setManualErrors({ submit: json?.error ?? 'Failed to add customer' });
+        return;
+      }
+
+      const inserted = Array.isArray(json?.data) ? json.data[0] : null;
+      if (inserted) {
+        setCustomers((prev) => [inserted as Customer, ...prev]);
+      }
+
+      setManualForm({ name: '', email: '', phone: '', country: '' });
+      setShowAddModal(false);
+    } catch {
+      setManualErrors({ submit: 'Something went wrong. Please try again.' });
+    } finally {
+      setManualLoading(false);
+    }
+  }
+
   // Stats
   const statsByCountry = useMemo(() => {
     const map: Record<string, number> = {};
@@ -135,8 +218,17 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           <p className="text-[#8B7355] text-sm mt-0.5">{customers.length} total leads · {filtered.length} shown</p>
         </div>
 
-        {/* Export dropdown */}
-        <div className="relative">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#2D3F8F] text-white text-sm font-medium rounded-xl hover:bg-[#24347A] transition-colors"
+          >
+            <span className="text-base leading-none">＋</span>
+            Add Manually
+          </button>
+
+          {/* Export dropdown */}
+          <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#2C1810] text-white text-sm font-medium rounded-xl hover:bg-[#1A0E08] transition-colors"
@@ -181,6 +273,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               )}
             </div>
           )}
+        </div>
         </div>
       </div>
 
@@ -274,15 +367,110 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           </table>
         </div>
 
-        {filtered.length > 0 && (
-          <div className="px-5 py-3 border-t border-[#F5F3EF] flex justify-between items-center">
-            <p className="text-xs text-[#A89080]">Showing {filtered.length} of {customers.length} leads</p>
-            <p className="text-xs text-[#C4A35A] font-medium cursor-pointer" onClick={() => setShowExportMenu(true)}>
-              Export {filtered.length} records →
-            </p>
-          </div>
-        )}
+      {filtered.length > 0 && (
+        <div className="px-5 py-3 border-t border-[#F5F3EF] flex justify-between items-center">
+          <p className="text-xs text-[#A89080]">Showing {filtered.length} of {customers.length} leads</p>
+          <p className="text-xs text-[#C4A35A] font-medium cursor-pointer" onClick={() => setShowExportMenu(true)}>
+            Export {filtered.length} records →
+          </p>
+        </div>
+      )}
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddModal(false)} />
+          <form
+            onSubmit={handleCreateManualCustomer}
+            className="relative w-full max-w-xl bg-white rounded-2xl border border-[#E8DFD0] shadow-2xl p-6 space-y-4"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-[#2C1810]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Add Customer Manually
+                </h2>
+                <p className="text-xs text-[#8B7355] mt-1">Isi form seperti di homepage untuk menambahkan lead manual.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="text-[#8B7355] hover:text-[#2C1810] text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-[#374151]">Full Name *</label>
+              <input
+                type="text"
+                value={manualForm.name}
+                onChange={(e) => setManualForm((prev) => ({ ...prev, name: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD0] text-sm text-[#2C1810] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30"
+                placeholder="e.g. Sarah Mitchell"
+              />
+              {manualErrors.name && <p className="text-xs text-red-600 mt-1">{manualErrors.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-[#374151]">Country</label>
+              <select
+                value={manualForm.country}
+                onChange={(e) => setManualForm((prev) => ({ ...prev, country: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD0] text-sm text-[#2C1810] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30"
+              >
+                <option value="">Select your country…</option>
+                {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-[#374151]">Email</label>
+              <input
+                type="email"
+                value={manualForm.email}
+                onChange={(e) => setManualForm((prev) => ({ ...prev, email: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD0] text-sm text-[#2C1810] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30"
+                placeholder="name@email.com"
+              />
+              {manualErrors.email && <p className="text-xs text-red-600 mt-1">{manualErrors.email}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-[#374151]">Phone / WhatsApp *</label>
+              <input
+                type="text"
+                value={manualForm.phone}
+                onChange={(e) => setManualForm((prev) => ({ ...prev, phone: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD0] text-sm text-[#2C1810] focus:outline-none focus:ring-2 focus:ring-[#C4A35A]/30"
+                placeholder="0812xxxxxxx"
+              />
+              {manualErrors.phone && <p className="text-xs text-red-600 mt-1">{manualErrors.phone}</p>}
+            </div>
+
+            {manualErrors.submit && (
+              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{manualErrors.submit}</p>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2 rounded-xl border border-[#E8DFD0] text-sm text-[#6B4C3B] hover:bg-[#FDF8F0]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={manualLoading}
+                className="px-4 py-2 rounded-xl bg-[#2D3F8F] text-white text-sm font-medium hover:bg-[#24347A] disabled:opacity-50"
+              >
+                {manualLoading ? 'Saving...' : 'Save Customer'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

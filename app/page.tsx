@@ -164,7 +164,7 @@ export default function LandingPage() {
       <nav style={{ borderBottom: '1px solid rgba(27,42,107,0.3)', backdropFilter: 'blur(12px)', background: 'rgba(10,14,26,0.9)' }}
         className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-3">
-          <Image src="/logo.jpg" alt="Kado Bajo" width={52} height={52} className="rounded-full object-cover" style={{ border: '2px solid rgba(27,42,107,0.8)' }} />
+          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" style={{ border: '2px solid rgba(27,42,107,0.8)' }} />
           <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#E8EAF0' }}>KADO BAJO</span>
         </div>
         <Link href="/login" className="text-xs font-medium px-4 py-2 rounded-full transition-all duration-200"
@@ -184,7 +184,7 @@ export default function LandingPage() {
         {/* Logo */}
         <div className="animate-float inline-block mb-8 relative">
           <div className="animate-pulse-ring" style={{ width:120, height:120, borderRadius:'50%', margin:'0 auto' }}>
-            <Image src="/logo.jpg" alt="Kado Bajo Logo" width={120} height={120}
+            <Image src="/logo.png" alt="Kado Bajo Logo" width={120} height={120}
               className="logo-glow rounded-full object-cover"
               style={{ border: '3px solid rgba(27,42,107,0.8)', width:120, height:120 }} />
           </div>
@@ -242,7 +242,7 @@ export default function LandingPage() {
           {/* Card header */}
           <div style={{ background: 'linear-gradient(135deg, #0F1A45, #1B2A6B)', padding: '28px 32px', borderBottom: '1px solid rgba(27,42,107,0.5)' }}>
             <div className="flex items-center gap-3 mb-3">
-              <Image src="/logo.jpg" alt="Kado Bajo" width={40} height={40} className="rounded-full object-cover" style={{ border: '2px solid rgba(45,63,143,0.6)' }} />
+              <Image src="/logo.png" alt="Kado Bajo" width={40} height={40} className="rounded-full object-cover" style={{ border: '2px solid rgba(45,63,143,0.6)' }} />
               <div>
                 <h2 className="serif text-white text-lg font-bold leading-none">Your Last Stop Before Departure</h2>
                 <p className="text-xs mt-1" style={{ color: '#8B93B8' }}>Pack it. Ship it. Done before check-in.</p>
@@ -376,7 +376,7 @@ export default function LandingPage() {
       <div className="divider mx-6" />
       <footer className="py-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <Image src="/logo.jpg" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover opacity-60" />
+          <Image src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover opacity-60" />
           <span className="serif text-sm font-bold tracking-widest" style={{ color: '#4A5280' }}>KADO BAJO</span>
         </div>
         <p className="text-xs" style={{ color: '#2D3570' }}>© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>

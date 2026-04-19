@@ -118,7 +118,12 @@ export default function LandingPage() {
           window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.${form.flight_date ? `%20My%20flight%20is%20on%20${encodeURIComponent(form.flight_date)}.` : ''}`;
         }, 1200);
       } else {
-        setErrors({ submit: data.error || 'Something went wrong. Please try again.' });
+        // API error — still go to WA so user can reach us
+        console.error('[form] API error:', data);
+        setSubmitted(true);
+        setTimeout(() => {
+          window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
+        }, 1200);
       }
     } catch {
       // Network error — still redirect to WA so user can reach us

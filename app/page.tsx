@@ -94,7 +94,12 @@ export default function LandingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      // Scroll to form so user can see the errors
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     setErrors({});
     setLoading(true);
     try {
@@ -103,14 +108,24 @@ export default function LandingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, ...utmParams }),
       });
-      if (res.ok) {
+
+      const data = await res.json();
+
+      if (res.ok || data.success) {
+        // Success OR duplicate — both redirect to WA
         setSubmitted(true);
         setTimeout(() => {
           window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.${form.flight_date ? `%20My%20flight%20is%20on%20${encodeURIComponent(form.flight_date)}.` : ''}`;
         }, 1200);
+      } else {
+        setErrors({ submit: data.error || 'Something went wrong. Please try again.' });
       }
     } catch {
-      setErrors({ submit: 'Something went wrong. Please try again.' });
+      // Network error — still redirect to WA so user can reach us
+      setSubmitted(true);
+      setTimeout(() => {
+        window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
+      }, 1200);
     } finally {
       setLoading(false);
     }

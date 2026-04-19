@@ -1,10 +1,15 @@
 import { getAllCustomers } from '@/lib/customers';
 import CustomersClient from './CustomersClient';
+import { Customer } from '@/types/customer';
 
-// Always render at request time — never statically at build
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {
-  const customers = await getAllCustomers();
+  let customers: Customer[] = [];
+  try {
+    customers = await getAllCustomers();
+  } catch {
+    // fail silently — client shows empty state
+  }
   return <CustomersClient initialCustomers={customers} />;
 }

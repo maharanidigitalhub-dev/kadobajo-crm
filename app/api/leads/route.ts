@@ -9,7 +9,7 @@ function detectDevice(ua: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, country, utm_source, utm_medium, utm_campaign, utm_content } = body;
+    const { name, email, phone, country, flight_date, notes: userNotes, utm_source, utm_medium, utm_campaign, utm_content } = body;
 
     if (!name?.trim() || !phone?.trim()) {
       return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const fullPayload = {
+    const { data, error } = await supabase.from('customers').insert({
       name: name.trim(),
       email: email?.trim() ?? '',
       phone: phoneClean,
@@ -58,49 +58,16 @@ export async function POST(req: NextRequest) {
       utm_content: utm_content ?? null,
       device,
       tag: null,
-      notes: null,
+      notes: userNotes ? `Flight: ${flight_date || "TBD"} | ${userNotes}` : (flight_date ? `Flight: ${flight_date}` : null),
       value: null,
-    };
+    });
 
-    const { data: insertedFull, error: fullInsertError } = await supabase
-      .from('customers')
-      .insert(fullPayload);
-
-    if (!fullInsertError) {
-      return NextResponse.json({ success: true, data: insertedFull }, { status: 201 });
-    }
-
-    const isSchemaColumnError =
-      fullInsertError.code === '42703' ||
-      /column .* does not exist|schema cache/i.test(fullInsertError.message);
-
-    if (!isSchemaColumnError) {
-      console.error('Supabase error:', fullInsertError);
+    if (error) {
+      console.error('Supabase error:', error);
       return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
     }
 
-    // Fallback for legacy schemas that don't have UTM / country / device fields yet.
-    const minimalPayload = {
-      name: name.trim(),
-      email: email?.trim() ?? '',
-      phone: phoneClean,
-      status: 'new',
-      source,
-      tag: null,
-      notes: null,
-      value: null,
-    };
-
-    const { data: insertedMinimal, error: minimalInsertError } = await supabase
-      .from('customers')
-      .insert(minimalPayload);
-
-    if (minimalInsertError) {
-      console.error('Supabase error:', minimalInsertError);
-      return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data: insertedMinimal }, { status: 201 });
+    return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
     console.error('API error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

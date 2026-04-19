@@ -1,96 +1,63 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-type CmsData = {
-  [key: string]: unknown;
-};
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-const cmsFilePath = path.join(process.cwd(), 'data', 'cms.json');
-const uploadDirPath = path.join(process.cwd(), 'public', 'uploads', 'cms');
-
-async function readCmsFile(): Promise<CmsData> {
-  const raw = await fs.readFile(cmsFilePath, 'utf-8');
-  return JSON.parse(raw) as CmsData;
+async function supabase(path: string, options: RequestInit = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+      ...(options.headers as Record<string, string>),
+    },
+    cache: 'no-store',
+  });
+  const text = await res.text();
+  return { ok: res.ok, status: res.status, data: text ? JSON.parse(text) : null };
 }
 
-async function writeCmsFile(data: CmsData): Promise<void> {
-  await fs.writeFile(cmsFilePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const key = searchParams.get('key');
-
-    if (!key) {
-      return NextResponse.json({ error: 'Query parameter "key" is required.' }, { status: 400 });
-    }
-
-    const cms = await readCmsFile();
-
-    if (!(key in cms)) {
-      return NextResponse.json({ error: `Key "${key}" not found.` }, { status: 404 });
-    }
-
-    return NextResponse.json({ key, data: cms[key] }, { status: 200 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to load CMS data.' }, { status: 500 });
+export async function GET() {
+  const { ok, data } = await supabase('/cms_content?id=eq.homepage&select=content');
+  if (!ok || !data?.length) {
+    return NextResponse.json({ error: 'Content not found' }, { status: 404 });
   }
+  return NextResponse.json(data[0].content, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-export async function POST(request: Request) {
+export async function PUT(req: NextRequest) {
   try {
-    const formData = await request.formData();
-    const key = String(formData.get('key') ?? '').trim();
-    const title = String(formData.get('title') ?? '').trim();
-    const subtitle = String(formData.get('subtitle') ?? '').trim();
-    const currentImage = String(formData.get('currentImage') ?? '').trim();
-    const imageFile = formData.get('image');
+    const body = await req.json();
 
-    if (!key) {
-      return NextResponse.json({ error: 'Field "key" is required.' }, { status: 400 });
-    }
-
-    if (!title || !subtitle) {
-      return NextResponse.json({ error: 'Field "title" and "subtitle" are required.' }, { status: 400 });
-    }
-
-    let imagePath = currentImage;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      if (!imageFile.type.startsWith('image/')) {
-        return NextResponse.json({ error: 'Uploaded file must be an image.' }, { status: 400 });
+    // Try update first
+    const { ok, status, data } = await supabase(
+      '/cms_content?id=eq.homepage',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ content: body, updated_at: new Date().toISOString() }),
       }
+    );
 
-      await fs.mkdir(uploadDirPath, { recursive: true });
-
-      const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '-').toLowerCase();
-      const fileName = `${Date.now()}-${safeName}`;
-      const targetPath = path.join(uploadDirPath, fileName);
-      const fileBuffer = Buffer.from(await imageFile.arrayBuffer());
-
-      await fs.writeFile(targetPath, fileBuffer);
-      imagePath = `/uploads/cms/${fileName}`;
+    if (!ok) {
+      // If not found, insert
+      if (status === 404 || (Array.isArray(data) && data.length === 0)) {
+        const ins = await supabase('/cms_content', {
+          method: 'POST',
+          body: JSON.stringify({ id: 'homepage', content: body }),
+        });
+        if (!ins.ok) {
+          return NextResponse.json({ error: 'Failed to create content', detail: ins.data }, { status: 500 });
+        }
+        return NextResponse.json({ success: true });
+      }
+      return NextResponse.json({ error: 'Failed to save', detail: data }, { status: 500 });
     }
 
-    if (!imagePath) {
-      return NextResponse.json({ error: 'Image is required.' }, { status: 400 });
-    }
-
-    const cms = await readCmsFile();
-    cms[key] = {
-      hero: {
-        title,
-        subtitle,
-        image: imagePath,
-      },
-    };
-
-    await writeCmsFile(cms);
-
-    return NextResponse.json({ success: true, key, data: cms[key] }, { status: 200 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to save CMS data.' }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('[cms] error:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

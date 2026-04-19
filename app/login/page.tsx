@@ -143,7 +143,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <Link href="/" className="login-back">← Kembali ke Landing Page</Link>
+        
       </div>
     </div>
   );

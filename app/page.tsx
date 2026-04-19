@@ -127,7 +127,7 @@ export default function LandingPage() {
         </a>
         <div className="nav-right">
           <button className="hero-cta nav-cta" onClick={scrollToForm}>Order Now →</button>
-          <Link href="/login" className="nav-admin">Admin</Link>
+          <Link href="https://admin.kadobajo.id/login" className="nav-admin">Admin</Link>
         </div>
       </nav>
 

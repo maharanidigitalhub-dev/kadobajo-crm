@@ -4,17 +4,41 @@ const nextConfig = {
 
   async rewrites() {
     return [
-      // When accessed via admin.kadobajo.id, rewrite / to /admin/login
+      // admin.kadobajo.id/ → /admin/login
       {
         source: '/',
         has: [{ type: 'host', value: 'admin.kadobajo.id' }],
         destination: '/admin/login',
       },
-      // Rewrite all admin.kadobajo.id paths to /admin/:path*
+      // admin.kadobajo.id/login → /admin/login
       {
-        source: '/:path((?!admin).*)',
+        source: '/login',
         has: [{ type: 'host', value: 'admin.kadobajo.id' }],
-        destination: '/admin/:path',
+        destination: '/admin/login',
+      },
+      // admin.kadobajo.id/dashboard → /admin/dashboard
+      {
+        source: '/dashboard',
+        has: [{ type: 'host', value: 'admin.kadobajo.id' }],
+        destination: '/admin/dashboard',
+      },
+      // admin.kadobajo.id/customers → /admin/customers
+      {
+        source: '/customers',
+        has: [{ type: 'host', value: 'admin.kadobajo.id' }],
+        destination: '/admin/customers',
+      },
+    ];
+  },
+
+  async redirects() {
+    return [
+      // admin.kadobajo.id/ → /login (hard redirect for root)
+      {
+        source: '/',
+        has: [{ type: 'host', value: 'admin.kadobajo.id' }],
+        destination: '/login',
+        permanent: false,
       },
     ];
   },

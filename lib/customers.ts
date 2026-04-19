@@ -6,7 +6,8 @@ export async function getAllCustomers(): Promise<Customer[]> {
     .from('customers')
     .select('*', { order: 'created_at.desc' });
 
-  if (error || !data) return [];
+  if (error) throw new Error(error.message);
+  if (!data) return [];
   return data as Customer[];
 }
 
@@ -15,7 +16,8 @@ export async function getRecentCustomers(limit = 5): Promise<Customer[]> {
     .from('customers')
     .select('*', { order: 'created_at.desc', limit });
 
-  if (error || !data) return [];
+  if (error) throw new Error(error.message);
+  if (!data) return [];
   return data as Customer[];
 }
 

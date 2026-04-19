@@ -119,8 +119,8 @@ export default function LandingPage() {
   }
 
   return (
-    /*<div style={{ background: '#fff', fontFamily: "'DM Sans', sans-serif", color: '#1a1209', minHeight: '100vh' }}>*/
-      <style>{'
+    <div style={{ background: '#fff', fontFamily: "'DM Sans', sans-serif", color: '#1a1209', minHeight: '100vh' }}/>
+      <style jsx>{'
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .serif { font-family: 'Playfair Display', serif; }

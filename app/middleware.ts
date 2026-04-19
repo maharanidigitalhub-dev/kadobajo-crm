@@ -4,58 +4,55 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const auth = req.cookies.get('auth')?.value;
 
-  // Get all possible host headers
+  // Detect admin domain — check all possible header sources
   const host =
     req.headers.get('x-forwarded-host') ??
     req.headers.get('host') ??
+    req.nextUrl.host ??
     '';
 
-  // Check if this is admin subdomain
-  // Also check VERCEL_URL env for local dev fallback
   const isAdmin =
-    host.startsWith('admin.') ||
     host === 'admin.kadobajo.id' ||
-    pathname.startsWith('/admin');
+    host.startsWith('admin.kadobajo') ||
+    host.startsWith('admin.') ||
+    // Env var flag — set NEXT_PUBLIC_IS_ADMIN=true in admin Vercel project
+    process.env.NEXT_PUBLIC_IS_ADMIN === 'true';
 
-  console.log('[middleware]', { host, pathname, isAdmin, auth: !!auth });
-
-  // ── ADMIN SUBDOMAIN ROUTES ──
+  // ── ADMIN DOMAIN ──
   if (isAdmin) {
-    // Strip /admin prefix if present (for path-based fallback)
-    const adminPath = pathname.startsWith('/admin')
-      ? pathname.replace(/^\/admin/, '') || '/'
-      : pathname;
-
-    if (adminPath === '/' || adminPath === '') {
+    // Root → redirect to login or dashboard
+    if (pathname === '/') {
       return NextResponse.redirect(
         new URL(auth === 'true' ? '/dashboard' : '/login', req.url)
       );
     }
 
+    // Protect dashboard & customers
     if (
-      (adminPath.startsWith('/dashboard') || adminPath.startsWith('/customers')) &&
+      (pathname.startsWith('/dashboard') || pathname.startsWith('/customers')) &&
       auth !== 'true'
     ) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
-    if (adminPath === '/login' && auth === 'true') {
+    // Already logged in — skip login
+    if (pathname === '/login' && auth === 'true') {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
     return NextResponse.next();
   }
 
-  // ── MAIN DOMAIN ──
-  // Protect /login /dashboard /customers on main domain
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/customers')) {
+  // ── MAIN DOMAIN (kadobajo.id) ──
+  // These routes don't exist on main domain
+  if (
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/customers') ||
+    pathname === '/login'
+  ) {
     if (auth !== 'true') {
       return NextResponse.redirect(new URL('/login', req.url));
     }
-  }
-
-  if (pathname === '/login' && auth === 'true') {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   return NextResponse.next();

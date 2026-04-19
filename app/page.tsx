@@ -127,10 +127,18 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}
-        className="flex justify-between items-center px-6 py-4">
+        className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" />
-          <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
+          <Image
+            src="/logo.png"
+            alt="Kado Bajo"
+            width={48}
+            height={48}
+            className="rounded-full object-cover w-10 h-10 sm:w-12 sm:h-12"
+          />
+          <span className="serif font-bold tracking-widest text-sm sm:text-base uppercase" style={{ color: '#1B2A6B' }}>
+            KADO BAJO
+          </span>
         </div>
         <Link href="/login"
           className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"

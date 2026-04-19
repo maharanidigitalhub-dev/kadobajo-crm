@@ -28,11 +28,14 @@ export default async function DashboardPage() {
   let all: Customer[] = [];
   let recent: Customer[] = [];
   let fetchError = false;
+  let fetchErrorMessage = "";
 
   try {
     [all, recent] = await Promise.all([getAllCustomers(), getRecentCustomers(5)]);
-  } catch {
+  } catch (error) {
     fetchError = true;
+    fetchErrorMessage = error instanceof Error ? error.message : "Unknown database error";
+    console.error('Dashboard fetch error:', error);
   }
 
   const counts = countByStatus(all);
@@ -66,17 +69,23 @@ export default async function DashboardPage() {
         <div className="mb-6 rounded-xl px-5 py-4" style={{ background: '#FEF2F2', border: '1.5px solid #FECACA' }}>
           <p className="text-sm font-semibold" style={{ color: '#DC2626' }}>⚠️ Tidak bisa terhubung ke database</p>
           <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
-            Periksa environment variables SUPABASE_URL dan SUPABASE_ANON_KEY di Vercel, lalu redeploy.
+            Periksa environment variables NEXT_PUBLIC_SUPABASE_URL + SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY (minimal) atau SUPABASE_SERVICE_ROLE_KEY (recommended) di Vercel, lalu redeploy.
           </p>
+          {fetchErrorMessage && (
+            <p className="text-xs mt-2 font-mono break-all" style={{ color: '#9CA3AF' }}>
+              Detail: {fetchErrorMessage}
+            </p>
+          )}
         </div>
       )}
 
       {/* No env vars banner */}
-      {!process.env.NEXT_PUBLIC_SUPABASE_URL && (
+      {!((process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL) &&
+        (process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) && (
         <div className="mb-6 rounded-xl px-5 py-4" style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A' }}>
           <p className="text-sm font-semibold" style={{ color: '#B45309' }}>⚠️ Supabase belum dikonfigurasi</p>
           <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
-            Tambahkan NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY di Vercel → Settings → Environment Variables, lalu redeploy.
+            Tambahkan NEXT_PUBLIC_SUPABASE_URL dan SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY (minimal) atau SUPABASE_SERVICE_ROLE_KEY (recommended) di Vercel → Settings → Environment Variables, lalu redeploy.
           </p>
         </div>
       )}

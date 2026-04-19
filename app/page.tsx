@@ -463,8 +463,8 @@ export default function LandingPage() {
               WhatsApp Us
             </a>
             <div className="footer-socials">
-              <a href="#" target="_blank" rel="noreferrer" className="footer-social">Instagram</a>
-              <a href="#" target="_blank" rel="noreferrer" className="footer-social">TikTok</a>
+              <a href="https://www.instagram.com/kadobajo?igsh=MXdnZzVybjg5ZTBqdg==" target="_blank" rel="noreferrer" className="footer-social">Instagram</a>
+              <a href="https://www.tiktok.com/@kadobajo?_r=1&_t=ZS-95fcnbGbB1p" target="_blank" rel="noreferrer" className="footer-social">TikTok</a>
             </div>
           </div>
           <div>

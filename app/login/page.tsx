@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,13 +20,7 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (res.ok) {
-        const { protocol, hostname } = window.location;
-        const baseHost = hostname.startsWith('admin.') ? hostname.slice(6) : hostname;
-        const targetHost = baseHost.includes('localhost') ? hostname : `admin.${baseHost}`;
-        window.location.href = `${protocol}//${targetHost}/admin`;
-        return;
-      }
+      if (res.ok) { router.push('/dashboard'); router.refresh(); }
       else setError('Email atau password salah.');
     } catch {
       setError('Terjadi kesalahan. Coba lagi.');

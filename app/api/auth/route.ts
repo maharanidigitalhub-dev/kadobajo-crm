@@ -9,15 +9,11 @@ export async function POST(req: NextRequest) {
 
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       const res = NextResponse.json({ success: true });
-      const host = req.headers.get('host') ?? '';
-      const isProdDomain = host.includes('kadobajo.id');
       res.cookies.set('auth', 'true', {
         httpOnly: true,
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 7 days
         sameSite: 'lax',
-        secure: isProdDomain,
-        ...(isProdDomain ? { domain: '.kadobajo.id' } : {}),
       });
       return res;
     }

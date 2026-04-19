@@ -9,7 +9,7 @@ function detectDevice(ua: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, country, utm_source, utm_medium, utm_campaign, utm_content } = body;
+    const { name, email, phone, country, flight_date, notes: userNotes, utm_source, utm_medium, utm_campaign, utm_content } = body;
 
     if (!name?.trim() || !phone?.trim()) {
       return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       utm_content: utm_content ?? null,
       device,
       tag: null,
-      notes: null,
+      notes: userNotes ? `Flight: ${flight_date || "TBD"} | ${userNotes}` : (flight_date ? `Flight: ${flight_date}` : null),
       value: null,
     };
 

@@ -3,23 +3,20 @@ const nextConfig = {
   reactStrictMode: true,
 
   async rewrites() {
-    return {
-      beforeFiles: [
-        // admin.kadobajo.id/* → serve /admin/* pages transparently
-        // URL stays as admin.kadobajo.id but serves the /admin route
-        {
-          source: '/:path*',
-          has: [{ type: 'host', value: 'admin.kadobajo.id' }],
-          destination: '/admin/:path*',
-        },
-        // admin.kadobajo.id/ → /admin/login (root)
-        {
-          source: '/',
-          has: [{ type: 'host', value: 'admin.kadobajo.id' }],
-          destination: '/admin/login',
-        },
-      ],
-    };
+    return [
+      // When accessed via admin.kadobajo.id, rewrite / to /admin/login
+      {
+        source: '/',
+        has: [{ type: 'host', value: 'admin.kadobajo.id' }],
+        destination: '/admin/login',
+      },
+      // Rewrite all admin.kadobajo.id paths to /admin/:path*
+      {
+        source: '/:path((?!admin).*)',
+        has: [{ type: 'host', value: 'admin.kadobajo.id' }],
+        destination: '/admin/:path',
+      },
+    ];
   },
 };
 

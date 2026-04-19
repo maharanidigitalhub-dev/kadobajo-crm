@@ -1,24 +1,33 @@
 import { supabase } from './supabase/server';
 import { Customer, CustomerStatus } from '../types/customer';
 
-export async function getAllCustomers(): Promise<Customer[]> {
-  const { data, error } = await supabase
+async function selectCustomersWithFallback(limit?: number): Promise<Customer[]> {
+  const ordered = await supabase
     .from('customers')
-    .select('*', { order: 'created_at.desc' });
+    .select('*', { order: 'created_at.desc', ...(limit ? { limit } : {}) });
 
-  if (error) throw new Error(error.message);
-  if (!data) return [];
-  return data as Customer[];
+  if (!ordered.error && ordered.data) {
+    return ordered.data as Customer[];
+  }
+
+  // Fallback for legacy schemas that do not have created_at yet.
+  const fallback = await supabase
+    .from('customers')
+    .select('*', limit ? { limit } : {});
+
+  if (fallback.error) {
+    throw new Error(fallback.error.message);
+  }
+
+  return (fallback.data ?? []) as Customer[];
+}
+
+export async function getAllCustomers(): Promise<Customer[]> {
+  return selectCustomersWithFallback();
 }
 
 export async function getRecentCustomers(limit = 5): Promise<Customer[]> {
-  const { data, error } = await supabase
-    .from('customers')
-    .select('*', { order: 'created_at.desc', limit });
-
-  if (error) throw new Error(error.message);
-  if (!data) return [];
-  return data as Customer[];
+  return selectCustomersWithFallback(limit);
 }
 
 export async function updateCustomerStatus(id: string, status: CustomerStatus) {

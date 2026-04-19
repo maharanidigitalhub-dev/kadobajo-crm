@@ -104,210 +104,200 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: '#0A0E1A', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
         .serif { font-family: 'Playfair Display', serif; }
 
-        /* Navy brand colors extracted from logo */
-        :root {
-          --navy: #1B2A6B;
-          --navy-light: #2D3F8F;
-          --navy-dark: #0F1A45;
-          --gold: #C4A020;
-          --gold-light: #E8C040;
-          --bg: #0A0E1A;
-          --bg-card: #0F1528;
-          --bg-card2: #131D35;
-          --border: rgba(27,42,107,0.5);
-          --text: #E8EAF0;
-          --text-muted: #8B93B8;
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse-ring {
+          0%{box-shadow:0 0 0 0 rgba(45,63,143,0.3)}
+          70%{box-shadow:0 0 0 18px rgba(45,63,143,0)}
+          100%{box-shadow:0 0 0 0 rgba(45,63,143,0)}
         }
-
-        @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(27,42,107,0.4)} 70%{box-shadow:0 0 0 20px rgba(27,42,107,0)} 100%{box-shadow:0 0 0 0 rgba(27,42,107,0)} }
-        @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
-
         .animate-float { animation: float 5s ease-in-out infinite; }
-        .animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
-        .animate-pulse-ring { animation: pulse-ring 2s ease infinite; }
-        .d1{animation-delay:0.1s;opacity:0} .d2{animation-delay:0.25s;opacity:0} .d3{animation-delay:0.4s;opacity:0} .d4{animation-delay:0.55s;opacity:0}
-
-        .btn-primary {
-          background: linear-gradient(135deg, var(--navy-light), var(--navy));
-          border: 1px solid rgba(45,63,143,0.6);
-          transition: all 0.2s;
-        }
-        .btn-primary:hover { background: linear-gradient(135deg, #3D52B0, var(--navy-light)); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27,42,107,0.5); }
-
-        .card { background: var(--bg-card); border: 1px solid var(--border); }
-        .card2 { background: var(--bg-card2); border: 1px solid var(--border); }
-
-        .input-field {
-          background: rgba(15,21,40,0.8);
-          border: 1px solid rgba(27,42,107,0.4);
-          color: var(--text);
-          transition: all 0.2s;
-        }
-        .input-field:focus { outline: none; border-color: var(--navy-light); box-shadow: 0 0 0 3px rgba(27,42,107,0.2); }
-        .input-field::placeholder { color: rgba(139,147,184,0.5); }
-
-        .logo-glow { filter: drop-shadow(0 0 20px rgba(27,42,107,0.8)) drop-shadow(0 0 40px rgba(27,42,107,0.4)); }
-
-        .star-gold { color: #C4A020; }
-
-        .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(27,42,107,0.5), transparent); }
+        .animate-fadeUp { animation: fadeUp 0.7s ease forwards; }
+        .pulse { animation: pulse-ring 2.5s ease infinite; }
+        .d1{animation-delay:0.1s;opacity:0}
+        .d2{animation-delay:0.25s;opacity:0}
+        .d3{animation-delay:0.4s;opacity:0}
+        .d4{animation-delay:0.55s;opacity:0}
       `}</style>
 
       {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(27,42,107,0.3)', backdropFilter: 'blur(12px)', background: 'rgba(10,14,26,0.9)' }}
-        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4">
+      <nav style={{ background: '#FFFFFF', borderBottom: '1px solid #E8ECF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}
+        className="flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" style={{ border: '2px solid rgba(27,42,107,0.8)' }} />
-          <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#E8EAF0' }}>KADO BAJO</span>
+          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} className="rounded-full object-cover" />
+          <span className="serif font-bold tracking-widest text-sm uppercase" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
         </div>
-        <Link href="/login" className="text-xs font-medium px-4 py-2 rounded-full transition-all duration-200"
-          style={{ color: '#8B93B8', border: '1px solid rgba(27,42,107,0.5)' }}
-          onMouseEnter={e => { (e.target as HTMLElement).style.color = '#E8EAF0'; (e.target as HTMLElement).style.borderColor = 'rgba(45,63,143,0.8)'; }}
-          onMouseLeave={e => { (e.target as HTMLElement).style.color = '#8B93B8'; (e.target as HTMLElement).style.borderColor = 'rgba(27,42,107,0.5)'; }}>
+        <Link href="/login"
+          className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"
+          style={{ color: '#2D3F8F', border: '1.5px solid #2D3F8F', background: 'transparent' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#2D3F8F'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#2D3F8F'; }}>
           Admin Login
         </Link>
       </nav>
 
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 text-center relative overflow-hidden">
-        {/* Background effects */}
-        <div style={{ position:'absolute', top:'10%', left:'50%', transform:'translateX(-50%)', width:'600px', height:'600px', background:'radial-gradient(circle, rgba(27,42,107,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundImage:'radial-gradient(rgba(27,42,107,0.08) 1px, transparent 1px)', backgroundSize:'40px 40px', pointerEvents:'none' }} />
+        {/* Subtle background accent */}
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(ellipse, rgba(45,63,143,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         {/* Logo */}
-        <div className="animate-float inline-block mb-8 relative">
-          <div className="animate-pulse-ring" style={{ width:120, height:120, borderRadius:'50%', margin:'0 auto' }}>
-            <Image src="/logo.png" alt="Kado Bajo Logo" width={120} height={120}
-              className="logo-glow rounded-full object-cover"
-              style={{ border: '3px solid rgba(27,42,107,0.8)', width:120, height:120 }} />
+        <div className="animate-float inline-block mb-8">
+          <div className="pulse" style={{ borderRadius: '50%', display: 'inline-block' }}>
+            <Image src="/logo.png" alt="Kado Bajo Logo" width={110} height={110}
+              className="rounded-full object-cover"
+              style={{ boxShadow: '0 8px 32px rgba(45,63,143,0.25)' }} />
           </div>
         </div>
 
         <div className="animate-fadeUp d1">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-3" style={{ color: '#2D3F8F' }}>
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-3" style={{ color: '#2D3F8F' }}>
             Komodo Airport · Labuan Bajo · NTT
           </p>
         </div>
 
-        <h1 className="animate-fadeUp d2 serif text-4xl md:text-6xl font-bold leading-tight mb-5 max-w-3xl mx-auto" style={{ color: '#E8EAF0' }}>
+        <h1 className="animate-fadeUp d2 serif text-4xl md:text-5xl font-bold leading-tight mb-5 max-w-3xl mx-auto" style={{ color: '#111827' }}>
           The Best of East Nusa Tenggara —{' '}
-          <span style={{ color: '#4B63C8' }}>Ready at Komodo Airport</span>{' '}
+          <span style={{ color: '#2D3F8F' }}>Ready at Komodo Airport</span>{' '}
           Before You Fly Home
         </h1>
 
-        <p className="animate-fadeUp d3 text-base md:text-lg max-w-xl mx-auto mb-5 font-light leading-relaxed" style={{ color: '#8B93B8' }}>
+        <p className="animate-fadeUp d3 text-base md:text-lg max-w-xl mx-auto mb-5 leading-relaxed" style={{ color: '#6B7280' }}>
           Order online. Your personal shopper prepares everything. Pick up right before check-in —
           zero stress, zero luggage hassle.
         </p>
 
-        <p className="animate-fadeUp d3 text-sm font-semibold mb-10" style={{ color: '#4B63C8' }}>
+        <p className="animate-fadeUp d3 text-sm font-semibold mb-10" style={{ color: '#2D3F8F' }}>
           🌟 Trusted by travellers from over 30 countries
         </p>
 
-        <div className="animate-fadeUp d4 flex flex-wrap justify-center gap-3 mb-4">
+        <div className="animate-fadeUp d4 flex flex-wrap justify-center gap-3">
           {['✓ Free packing & gift wrap', '✓ Personal shopper included', '✓ All major cards accepted'].map((b) => (
-            <span key={b} className="text-xs px-4 py-2 rounded-full" style={{ color: '#8B93B8', border: '1px solid rgba(27,42,107,0.4)', background: 'rgba(27,42,107,0.1)' }}>{b}</span>
+            <span key={b} className="text-xs font-medium px-4 py-2 rounded-full"
+              style={{ color: '#2D3F8F', border: '1.5px solid #C7D0F0', background: '#F0F3FD' }}>
+              {b}
+            </span>
           ))}
         </div>
       </section>
 
-      <div className="divider mx-6 mb-16" />
+      {/* Divider */}
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8ECF8, transparent)', margin: '0 24px 48px' }} />
 
       {/* Benefits */}
       <section className="px-6 pb-16 max-w-5xl mx-auto">
-        <h2 className="serif text-center text-2xl font-bold mb-10" style={{ color: '#E8EAF0' }}>Why Travellers Choose Kado Bajo</h2>
+        <h2 className="serif text-center text-2xl font-bold mb-10" style={{ color: '#111827' }}>Why Travellers Choose Kado Bajo</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {BENEFITS.map((b) => (
-            <div key={b.title} className="card rounded-2xl p-5 hover:border-[#2D3F8F] transition-all duration-200 hover:-translate-y-1">
+            <div key={b.title} className="rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1"
+              style={{ background: '#F8F9FF', border: '1.5px solid #E8ECF8', boxShadow: '0 2px 8px rgba(45,63,143,0.06)' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = '#B0BBE8'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = '#E8ECF8'}>
               <span className="text-2xl mb-3 block">{b.icon}</span>
-              <h3 className="serif font-semibold text-sm mb-2" style={{ color: '#C8D0F0' }}>{b.title}</h3>
-              <p className="text-xs leading-relaxed" style={{ color: '#8B93B8' }}>{b.desc}</p>
+              <h3 className="serif font-semibold text-sm mb-2" style={{ color: '#1B2A6B' }}>{b.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>{b.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <div className="divider mx-6 mb-16" />
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8ECF8, transparent)', margin: '0 24px 48px' }} />
 
       {/* Lead Form */}
       <section className="px-6 pb-16 max-w-lg mx-auto">
-        <div className="card rounded-3xl overflow-hidden" style={{ boxShadow: '0 0 60px rgba(27,42,107,0.3)' }}>
-          {/* Card header */}
-          <div style={{ background: 'linear-gradient(135deg, #0F1A45, #1B2A6B)', padding: '28px 32px', borderBottom: '1px solid rgba(27,42,107,0.5)' }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Image src="/logo.png" alt="Kado Bajo" width={40} height={40} className="rounded-full object-cover" style={{ border: '2px solid rgba(45,63,143,0.6)' }} />
+        <div className="rounded-3xl overflow-hidden" style={{ border: '1.5px solid #E8ECF8', boxShadow: '0 8px 40px rgba(45,63,143,0.12)' }}>
+          {/* Card header — navy, logo tetap */}
+          <div style={{ background: 'linear-gradient(135deg, #1B2A6B, #2D3F8F)', padding: '28px 32px' }}>
+            <div className="flex items-center gap-3">
+              <Image src="/logo.png" alt="Kado Bajo" width={44} height={44} className="rounded-full object-cover flex-shrink-0"
+                style={{ boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
               <div>
-                <h2 className="serif text-white text-lg font-bold leading-none">Your Last Stop Before Departure</h2>
-                <p className="text-xs mt-1" style={{ color: '#8B93B8' }}>Pack it. Ship it. Done before check-in.</p>
+                <h2 className="serif text-white text-lg font-bold leading-tight">Your Last Stop Before Departure</h2>
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>Pack it. Ready before check-in.</p>
               </div>
             </div>
           </div>
 
           {submitted ? (
-            <div className="px-8 py-14 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(27,42,107,0.3)', border: '2px solid rgba(27,42,107,0.6)' }}>
-                <svg className="w-8 h-8" fill="none" stroke="#4B63C8" viewBox="0 0 24 24">
+            <div className="px-8 py-14 text-center" style={{ background: '#fff' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: '#F0F3FD', border: '2px solid #C7D0F0' }}>
+                <svg className="w-8 h-8" fill="none" stroke="#2D3F8F" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="serif text-xl font-bold mb-2" style={{ color: '#E8EAF0' }}>Order received!</h3>
-              <p className="text-sm" style={{ color: '#8B93B8' }}>Redirecting to WhatsApp to confirm your order…</p>
+              <h3 className="serif text-xl font-bold mb-2" style={{ color: '#111827' }}>Order received!</h3>
+              <p className="text-sm" style={{ color: '#6B7280' }}>Redirecting to WhatsApp to confirm your order…</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="px-8 py-8 space-y-5">
+            <form onSubmit={handleSubmit} className="px-8 py-8 space-y-5" style={{ background: '#fff' }}>
               {/* Name */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>Full Name *</label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Sarah Mitchell"
-                  className={`input-field w-full px-4 py-3 rounded-xl text-sm ${errors.name ? 'border-red-500' : ''}`} />
-                {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#374151' }}>Full Name *</label>
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="e.g. Sarah Mitchell"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: errors.name ? '1.5px solid #EF4444' : '1.5px solid #E5E7EB', background: '#F9FAFB', color: '#111827', fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+                  onFocus={e => (e.target as HTMLElement).style.borderColor = '#2D3F8F'}
+                  onBlur={e => (e.target as HTMLElement).style.borderColor = errors.name ? '#EF4444' : '#E5E7EB'} />
+                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
               </div>
 
               {/* Country */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>
-                  Country <span className="normal-case font-normal tracking-normal" style={{ color: '#4A5280' }}>(helps us serve you better)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#374151' }}>
+                  Country <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(helps us serve you better)</span>
                 </label>
                 <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  className="input-field w-full px-4 py-3 rounded-xl text-sm appearance-none cursor-pointer">
-                  <option value="" style={{ background: '#0F1528' }}>Select your country…</option>
-                  {COUNTRIES.map((c) => <option key={c.code} value={c.code} style={{ background: '#0F1528' }}>{c.name}</option>)}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1.5px solid #E5E7EB', background: '#F9FAFB', color: form.country ? '#111827' : '#9CA3AF', fontSize: 14, outline: 'none', appearance: 'none', cursor: 'pointer' }}
+                  onFocus={e => (e.target as HTMLElement).style.borderColor = '#2D3F8F'}
+                  onBlur={e => (e.target as HTMLElement).style.borderColor = '#E5E7EB'}>
+                  <option value="">Select your country…</option>
+                  {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
                 </select>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>
-                  Email <span className="normal-case font-normal tracking-normal" style={{ color: '#4A5280' }}>(optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#374151' }}>
+                  Email <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
                 </label>
-                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com"
-                  className={`input-field w-full px-4 py-3 rounded-xl text-sm ${errors.email ? 'border-red-500' : ''}`} />
-                {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="you@example.com"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: errors.email ? '1.5px solid #EF4444' : '1.5px solid #E5E7EB', background: '#F9FAFB', color: '#111827', fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+                  onFocus={e => (e.target as HTMLElement).style.borderColor = '#2D3F8F'}
+                  onBlur={e => (e.target as HTMLElement).style.borderColor = errors.email ? '#EF4444' : '#E5E7EB'} />
+                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#8B93B8' }}>WhatsApp Number *</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#4A5280' }}>+</span>
-                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="628123456789"
-                    className={`input-field w-full pl-6 pr-4 py-3 rounded-xl text-sm ${errors.phone ? 'border-red-500' : ''}`} />
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#374151' }}>WhatsApp Number *</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: 14 }}>+</span>
+                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    placeholder="628123456789"
+                    style={{ width: '100%', padding: '12px 16px 12px 26px', borderRadius: 12, border: errors.phone ? '1.5px solid #EF4444' : '1.5px solid #E5E7EB', background: '#F9FAFB', color: '#111827', fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+                    onFocus={e => (e.target as HTMLElement).style.borderColor = '#2D3F8F'}
+                    onBlur={e => (e.target as HTMLElement).style.borderColor = errors.phone ? '#EF4444' : '#E5E7EB'} />
                 </div>
-                <p className="text-xs mt-1" style={{ color: '#4A5280' }}>Include country code (628… Indonesia, 614… Australia, 1… USA)</p>
-                {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
+                <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Include country code (628… Indonesia, 614… Australia, 1… USA)</p>
+                {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
               </div>
 
-              {errors.submit && <p className="text-sm text-red-400 rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>{errors.submit}</p>}
+              {errors.submit && (
+                <p className="text-sm rounded-xl px-4 py-3" style={{ color: '#DC2626', background: '#FEF2F2', border: '1px solid #FECACA' }}>{errors.submit}</p>
+              )}
 
               <button type="submit" disabled={loading}
-                className="btn-primary w-full text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50">
+                className="w-full font-semibold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+                style={{ background: 'linear-gradient(135deg, #2D3F8F, #1B2A6B)', color: '#fff', border: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 24px rgba(45,63,143,0.35)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}>
                 {loading ? (
                   <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing…</>
                 ) : (
@@ -319,28 +309,31 @@ export default function LandingPage() {
                   </>
                 )}
               </button>
-              <p className="text-center text-xs" style={{ color: '#4A5280' }}>Your data is safe. We will never spam you.</p>
+              <p className="text-center text-xs" style={{ color: '#9CA3AF' }}>Your data is safe. We will never spam you.</p>
             </form>
           )}
         </div>
       </section>
 
-      <div className="divider mx-6 mb-16" />
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8ECF8, transparent)', margin: '0 24px 48px' }} />
 
       {/* Testimonials */}
       <section className="px-6 pb-16 max-w-4xl mx-auto">
-        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#E8EAF0' }}>What Travellers Say</h2>
-        <p className="text-center text-sm mb-8" style={{ color: '#8B93B8' }}>From 30+ countries around the world</p>
+        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#111827' }}>What Travellers Say</h2>
+        <p className="text-center text-sm mb-8" style={{ color: '#6B7280' }}>From 30+ countries around the world</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="card rounded-2xl p-5">
-              <div className="flex gap-0.5 mb-3">{[1,2,3,4,5].map(i => <span key={i} className="star-gold text-sm">★</span>)}</div>
-              <p className="text-xs italic leading-relaxed mb-4" style={{ color: '#8B93B8' }}>"{t.quote}"</p>
+            <div key={t.name} className="rounded-2xl p-5"
+              style={{ background: '#F8F9FF', border: '1.5px solid #E8ECF8' }}>
+              <div className="flex gap-0.5 mb-3">
+                {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#F59E0B', fontSize: 14 }}>★</span>)}
+              </div>
+              <p className="text-xs italic leading-relaxed mb-4" style={{ color: '#4B5563' }}>"{t.quote}"</p>
               <div className="flex items-center gap-2">
                 <span className="text-lg">{t.flag}</span>
                 <div>
-                  <p className="text-xs font-semibold" style={{ color: '#C8D0F0' }}>{t.name}</p>
-                  <p className="text-xs" style={{ color: '#4A5280' }}>{t.location}</p>
+                  <p className="text-xs font-semibold" style={{ color: '#1B2A6B' }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: '#9CA3AF' }}>{t.location}</p>
                 </div>
               </div>
             </div>
@@ -348,24 +341,27 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="divider mx-6 mb-16" />
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8ECF8, transparent)', margin: '0 24px 48px' }} />
 
       {/* FAQ */}
       <section className="px-6 pb-20 max-w-2xl mx-auto">
-        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#E8EAF0' }}>Frequently Asked Questions</h2>
-        <p className="text-center text-sm mb-8" style={{ color: '#8B93B8' }}>Everything you need to know before you fly</p>
+        <h2 className="serif text-center text-2xl font-bold mb-2" style={{ color: '#111827' }}>Frequently Asked Questions</h2>
+        <p className="text-center text-sm mb-8" style={{ color: '#6B7280' }}>Everything you need to know before you fly</p>
         <div className="space-y-3">
           {FAQS.map((faq, i) => (
-            <div key={i} className="card rounded-2xl overflow-hidden">
+            <div key={i} className="rounded-2xl overflow-hidden"
+              style={{ border: '1.5px solid #E8ECF8', background: '#fff' }}>
               <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full px-5 py-4 flex justify-between items-center text-left transition-colors hover:bg-white/5"
-                style={{ color: '#C8D0F0' }}>
+                className="w-full px-5 py-4 flex justify-between items-center text-left transition-colors"
+                style={{ color: '#111827' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F8F9FF'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                 <span className="text-sm font-semibold">{faq.q}</span>
-                <span className="text-xl transition-transform duration-200 ml-3 flex-shrink-0"
+                <span className="text-xl ml-3 flex-shrink-0 transition-transform duration-200 inline-block"
                   style={{ color: '#2D3F8F', transform: openFaq === i ? 'rotate(45deg)' : 'none' }}>+</span>
               </button>
               {openFaq === i && (
-                <p className="px-5 pb-4 text-sm leading-relaxed" style={{ color: '#8B93B8', borderTop: '1px solid rgba(27,42,107,0.2)' }}>{faq.a}</p>
+                <p className="px-5 pb-4 text-sm leading-relaxed" style={{ color: '#6B7280', borderTop: '1px solid #F3F4F6' }}>{faq.a}</p>
               )}
             </div>
           ))}
@@ -373,13 +369,13 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <div className="divider mx-6" />
-      <footer className="py-8 text-center">
+      <div style={{ height: 1, background: '#F3F4F6', margin: '0 24px' }} />
+      <footer className="py-8 text-center" style={{ background: '#fff' }}>
         <div className="flex items-center justify-center gap-3 mb-3">
-          <Image src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover opacity-60" />
-          <span className="serif text-sm font-bold tracking-widest" style={{ color: '#4A5280' }}>KADO BAJO</span>
+          <Image src="/logo.png" alt="Kado Bajo" width={28} height={28} className="rounded-full object-cover" style={{ opacity: 0.8 }} />
+          <span className="serif text-sm font-bold tracking-widest" style={{ color: '#1B2A6B' }}>KADO BAJO</span>
         </div>
-        <p className="text-xs" style={{ color: '#2D3570' }}>© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>
+        <p className="text-xs" style={{ color: '#9CA3AF' }}>© 2025 Kado Bajo · Komodo Airport, Labuan Bajo, Flores, NTT</p>
       </footer>
     </div>
   );

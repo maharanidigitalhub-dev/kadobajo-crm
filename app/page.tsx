@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-const WHATSAPP_NUMBER = '6281234567890';
+const WHATSAPP_NUMBER = '6282146970988';
 
 const COUNTRIES = [
   { code: 'AU', name: 'Australia' },

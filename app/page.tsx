@@ -118,9 +118,8 @@ export default function LandingPage() {
   }
 
   return (
-    <div style={{ background: '#fff', fontFamily: "'DM Sans', sans-serif", color: '#1a1209', minHeight: '100vh' }}>
-      
-      {/* ── 1. NAVBAR ── */}
+    <div style={{ background: '#fff', color: '#1a1209', minHeight: '100vh' }}>
+{/* ── 1. NAVBAR ── */}
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <a href="#" className="nav-logo">
           <img src="/logo.png" alt="Kado Bajo" />
@@ -137,7 +136,7 @@ export default function LandingPage() {
         <div className="hero-logo">
           <div className="logo-float">
             <div className="logo-pulse">
-              <img src="/logo.png" alt="Kado Bajo Logo" style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 8px 32px rgba(45,63,143,0.25)' }} />
+              <img src="/logo.png" alt="Kado Bajo Logo" className="hero-logo-img" />
             </div>
           </div>
         </div>

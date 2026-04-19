@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase.from('customers').insert({
+    const fullPayload = {
       name: name.trim(),
       email: email?.trim() ?? '',
       phone: phoneClean,
@@ -60,14 +60,47 @@ export async function POST(req: NextRequest) {
       tag: null,
       notes: null,
       value: null,
-    });
+    };
 
-    if (error) {
-      console.error('Supabase error:', error);
+    const { data: insertedFull, error: fullInsertError } = await supabase
+      .from('customers')
+      .insert(fullPayload);
+
+    if (!fullInsertError) {
+      return NextResponse.json({ success: true, data: insertedFull }, { status: 201 });
+    }
+
+    const isSchemaColumnError =
+      fullInsertError.code === '42703' ||
+      /column .* does not exist|schema cache/i.test(fullInsertError.message);
+
+    if (!isSchemaColumnError) {
+      console.error('Supabase error:', fullInsertError);
       return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, data }, { status: 201 });
+    // Fallback for legacy schemas that don't have UTM / country / device fields yet.
+    const minimalPayload = {
+      name: name.trim(),
+      email: email?.trim() ?? '',
+      phone: phoneClean,
+      status: 'new',
+      source,
+      tag: null,
+      notes: null,
+      value: null,
+    };
+
+    const { data: insertedMinimal, error: minimalInsertError } = await supabase
+      .from('customers')
+      .insert(minimalPayload);
+
+    if (minimalInsertError) {
+      console.error('Supabase error:', minimalInsertError);
+      return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data: insertedMinimal }, { status: 201 });
   } catch (err) {
     console.error('API error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

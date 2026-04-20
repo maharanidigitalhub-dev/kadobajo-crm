@@ -95,6 +95,32 @@ export default function LandingPage() {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  // Detect if hero background is dark → use light text
+  function isHeroDark(): boolean {
+    const h = cms?.hero;
+    if (!h) return false;
+    if (h.bg_type === 'image' && h.bg_image_url) return (h.bg_overlay ?? 40) >= 30;
+    if (h.bg_type === 'color' && h.bg_color) {
+      const hex = h.bg_color.replace('#', '');
+      if (hex.length < 6) return false;
+      const r = parseInt(hex.slice(0,2), 16) / 255;
+      const g = parseInt(hex.slice(2,4), 16) / 255;
+      const b = parseInt(hex.slice(4,6), 16) / 255;
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+      return luminance < 0.5;
+    }
+    return false;
+  }
+
+  const heroDark = isHeroDark();
+  const heroTextColor = heroDark ? '#ffffff' : 'var(--ink)';
+  const heroSubColor = heroDark ? 'rgba(255,255,255,0.85)' : 'var(--muted)';
+  const heroEyebrowColor = heroDark ? 'rgba(255,255,255,0.7)' : 'var(--navy)';
+  const heroBadgeBg = heroDark ? 'rgba(255,255,255,0.15)' : 'rgba(45,63,143,0.04)';
+  const heroBadgeBorder = heroDark ? 'rgba(255,255,255,0.3)' : 'rgba(45,63,143,0.2)';
+  const heroBadgeColor = heroDark ? '#ffffff' : 'var(--navy)';
+  const heroUrgencyColor = heroDark ? 'rgba(255,255,255,0.9)' : 'var(--navy)';
+
   function validate() {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = 'Name is required';
@@ -162,18 +188,17 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── 2. HERO ── */}
-<section className="hero" style={(() => {
-  const h = cms?.hero;
-  if (h?.bg_type === 'image' && h.bg_image_url) return {
-    backgroundImage: `linear-gradient(rgba(0,0,0,${(h.bg_overlay ?? 40) / 100}), rgba(0,0,0,${(h.bg_overlay ?? 40) / 100})), url(${h.bg_image_url})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  };
-  if (h?.bg_type === 'color' && h.bg_color) return { background: h.bg_color };
-  // Default gradient fallback
-  return { background: 'linear-gradient(180deg, #F8F9FF 0%, #fff 60%)' };
-})()}>
+   {/* ── 2. HERO ── */}
+      <section className="hero" style={(() => {
+        const h = cms?.hero;
+        if (h?.bg_type === 'image' && h.bg_image_url) return {
+          backgroundImage: `linear-gradient(rgba(0,0,0,${(h.bg_overlay ?? 40) / 100}), rgba(0,0,0,${(h.bg_overlay ?? 40) / 100})), url(${h.bg_image_url})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        };
+        if (h?.bg_type === 'color' && h.bg_color) return { background: h.bg_color };
+        return { background: 'linear-gradient(180deg, #F8F9FF 0%, #fff 60%)' };
+      })()}>
         <div className="hero-logo">
           <div className="logo-float">
             <div className="logo-pulse">
@@ -182,13 +207,13 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <p className="hero-eyebrow fadeUp d1">{cms?.hero.eyebrow ?? 'Komodo Airport · Labuan Bajo · NTT'}</p>
+        <p className="hero-eyebrow fadeUp d1" style={{ color: heroEyebrowColor }}>{cms?.hero.eyebrow ?? 'Komodo Airport · Labuan Bajo · NTT'}</p>
 
-        <h1 className="hero-h1 fadeUp d2">
+        <h1 className="hero-h1 fadeUp d2" style={{ color: heroTextColor }}>
           {cms?.hero.headline ?? <>The Best of East Nusa Tenggara —{' '}<em>Ready at Komodo Airport</em>{' '}Before You Fly Home</>}
         </h1>
 
-        <p className="hero-sub fadeUp d2">
+        <p className="hero-sub fadeUp d2" style={{ color: heroSubColor }}>
           {cms?.hero.subheadline ?? 'Order online. Your personal shopper prepares everything. Pick up right before check-in — zero stress, zero luggage hassle.'}
         </p>
 
@@ -196,11 +221,11 @@ export default function LandingPage() {
           {cms?.hero.cta ?? 'Reserve My Gifts Now →'}
         </button>
 
-        <p className="hero-urgency">{cms?.hero.urgency ?? "⏰ Order before your flight. We'll have everything packed and ready at the airport."}</p>
+        <p className="hero-urgency" style={{ color: heroUrgencyColor }}>{cms?.hero.urgency ?? "⏰ Order before your flight. We'll have everything packed and ready at the airport."}</p>
 
         <div className="hero-badges">
           {['✓ Free packing & gift wrap', '✓ Personal shopper included', '✓ All major cards accepted'].map(b => (
-            <span key={b} className="hero-badge">{b}</span>
+            <span key={b} className="hero-badge" style={{ color: heroBadgeColor, background: heroBadgeBg, borderColor: heroBadgeBorder }}>{b}</span>
           ))}
         </div>
       </section>

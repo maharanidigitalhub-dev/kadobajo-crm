@@ -33,7 +33,6 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Use upsert — works whether row exists or not
     const res = await fetch(`${SUPABASE_URL}/rest/v1/cms_content`, {
       method: 'POST',
       headers: headers(),
@@ -49,10 +48,7 @@ export async function PUT(req: NextRequest) {
     console.log('[cms PUT] status:', res.status, 'body:', text.slice(0, 200));
 
     if (!res.ok) {
-      return NextResponse.json(
-        { error: 'Failed to save', detail: text },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to save', detail: text }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

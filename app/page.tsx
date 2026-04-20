@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-const WHATSAPP_NUMBER = '6282146970988';
+const WHATSAPP_NUMBER = '6282146970988'; // fallback
 
 const COUNTRIES = [
   { code: 'AU', name: 'Australia' },
@@ -59,6 +59,11 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const [cms, setCms] = useState<{
+    hero: { eyebrow: string; headline: string; subheadline: string; urgency: string; cta: string; bg_type: string; bg_color: string; bg_image_url: string; bg_overlay: number };
+    trust: { icon: string; text: string; sub: string }[];
+    whatsapp: string;
+  } | null>(null);
 
   // Capture UTM params
   useEffect(() => {
@@ -69,6 +74,14 @@ export default function LandingPage() {
       utm_campaign: params.get('utm_campaign') ?? '',
       utm_content: params.get('utm_content') ?? '',
     });
+  }, []);
+
+  // Fetch CMS content
+  useEffect(() => {
+    fetch('/api/cms')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data && !data.error) setCms(data); })
+      .catch(() => {});
   }, []);
 
   // Sticky navbar
@@ -115,21 +128,21 @@ export default function LandingPage() {
         // Success OR duplicate — both redirect to WA
         setSubmitted(true);
         setTimeout(() => {
-          window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.${form.flight_date ? `%20My%20flight%20is%20on%20${encodeURIComponent(form.flight_date)}.` : ''}`;
+          window.location.href = `https://wa.me/${cms?.whatsapp ?? WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.${form.flight_date ? `%20My%20flight%20is%20on%20${encodeURIComponent(form.flight_date)}.` : ''}`;
         }, 1200);
       } else {
         // API error — still go to WA so user can reach us
         console.error('[form] API error:', data);
         setSubmitted(true);
         setTimeout(() => {
-          window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
+          window.location.href = `https://wa.me/${cms?.whatsapp ?? WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20from%20${encodeURIComponent(form.country || 'abroad')}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
         }, 1200);
       }
     } catch {
       // Network error — still redirect to WA so user can reach us
       setSubmitted(true);
       setTimeout(() => {
-        window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
+        window.location.href = `https://wa.me/${cms?.whatsapp ?? WHATSAPP_NUMBER}?text=Hi%20Kado%20Bajo!%20I%27m%20${encodeURIComponent(form.name)}%20and%20I%27d%20like%20to%20order%20souvenirs.`;
       }, 1200);
     } finally {
       setLoading(false);
@@ -150,7 +163,14 @@ export default function LandingPage() {
       </nav>
 
       {/* ── 2. HERO ── */}
-      <section className="hero">
+      <section className="hero" style={
+        cms?.hero.bg_type === 'image' && cms.hero.bg_image_url ? {
+          backgroundImage: `linear-gradient(rgba(0,0,0,${(cms.hero.bg_overlay ?? 40) / 100}), rgba(0,0,0,${(cms.hero.bg_overlay ?? 40) / 100})), url(${cms.hero.bg_image_url})`,
+          backgroundSize: 'cover', backgroundPosition: 'center', background: undefined,
+        } : cms?.hero.bg_type === 'color' ? {
+          background: cms.hero.bg_color,
+        } : undefined
+      }>
         <div className="hero-logo">
           <div className="logo-float">
             <div className="logo-pulse">
@@ -159,23 +179,21 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <p className="hero-eyebrow fadeUp d1">Komodo Airport · Labuan Bajo · NTT</p>
+        <p className="hero-eyebrow fadeUp d1">{cms?.hero.eyebrow ?? 'Komodo Airport · Labuan Bajo · NTT'}</p>
 
         <h1 className="hero-h1 fadeUp d2">
-          The Best of East Nusa Tenggara —{' '}
-          <em>Ready at Komodo Airport</em>{' '}
-          Before You Fly Home
+          {cms?.hero.headline ?? <>The Best of East Nusa Tenggara —{' '}<em>Ready at Komodo Airport</em>{' '}Before You Fly Home</>}
         </h1>
 
         <p className="hero-sub fadeUp d2">
-          Order online. Your personal shopper prepares everything. Pick up right before check-in — zero stress, zero luggage hassle.
+          {cms?.hero.subheadline ?? 'Order online. Your personal shopper prepares everything. Pick up right before check-in — zero stress, zero luggage hassle.'}
         </p>
 
         <button className="hero-cta fadeUp d3" onClick={scrollToForm}>
-          Reserve My Gifts Now →
+          {cms?.hero.cta ?? 'Reserve My Gifts Now →'}
         </button>
 
-        <p className="hero-urgency">⏰ Order before your flight. We'll have everything packed and ready at the airport.</p>
+        <p className="hero-urgency">{cms?.hero.urgency ?? "⏰ Order before your flight. We'll have everything packed and ready at the airport."}</p>
 
         <div className="hero-badges">
           {['✓ Free packing & gift wrap', '✓ Personal shopper included', '✓ All major cards accepted'].map(b => (
@@ -187,12 +205,12 @@ export default function LandingPage() {
       {/* ── 3. TRUST BAR ── */}
       <div className="trust-bar">
         <div className="trust-bar-inner">
-          {[
+          {(cms?.trust ?? [
             { icon: '🌍', text: '30+ Countries', sub: 'Trusted by travellers worldwide' },
             { icon: '⭐', text: '5-Star Rated', sub: 'Tripadvisor & Google' },
             { icon: '✈️', text: 'Right at Komodo Airport', sub: 'Before check-in counters' },
             { icon: '🎁', text: 'Personal Shopper — Free', sub: 'No other souvenir shop has this' },
-          ].map(t => (
+          ]).map(t => (
             <div key={t.text} className="trust-item">
               <span className="trust-icon">{t.icon}</span>
               <div>

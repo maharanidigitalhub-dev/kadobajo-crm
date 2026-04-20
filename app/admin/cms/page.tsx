@@ -69,7 +69,10 @@ export default function CMSPage() {
       const data = await res.json();
       if (res.ok && data.success) { setStatus('saved'); setTimeout(() => setStatus('idle'), 2500); }
       else { setStatus('error'); setTimeout(() => setStatus('idle'), 3000); }
-    } catch { setStatus('error'); setTimeout(() => setStatus('idle'), async function handleImageUpload(file: File) {
+    } catch { setStatus('error'); setTimeout(() => setStatus('idle'), 3000); }
+  }
+
+  async function handleImageUpload(file: File) {
   setUploadError('');
   if (file.size > 5 * 1024 * 1024) { setUploadError('File terlalu besar. Max 5MB.'); return; }
   if (!file.type.startsWith('image/')) { setUploadError('Hanya file gambar yang diizinkan.'); return; }
@@ -95,8 +98,7 @@ export default function CMSPage() {
   } catch { setUploadError('Upload gagal. Coba lagi.'); }
   finally { setUploading(false); }
 }
-  
-  
+
   function updateHero(key: keyof CMSContent['hero'], val: string | number) {
     setContent(prev => ({ ...prev, hero: { ...prev.hero, [key]: val } }));
   }

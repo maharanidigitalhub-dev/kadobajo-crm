@@ -163,14 +163,17 @@ export default function LandingPage() {
       </nav>
 
       {/* ── 2. HERO ── */}
-      <section className="hero" style={
-        cms?.hero.bg_type === 'image' && cms.hero.bg_image_url ? {
-          backgroundImage: `linear-gradient(rgba(0,0,0,${(cms.hero.bg_overlay ?? 40) / 100}), rgba(0,0,0,${(cms.hero.bg_overlay ?? 40) / 100})), url(${cms.hero.bg_image_url})`,
-          backgroundSize: 'cover', backgroundPosition: 'center', background: undefined,
-        } : cms?.hero.bg_type === 'color' ? {
-          background: cms.hero.bg_color,
-        } : undefined
-      }>
+<section className="hero" style={(() => {
+  const h = cms?.hero;
+  if (h?.bg_type === 'image' && h.bg_image_url) return {
+    backgroundImage: `linear-gradient(rgba(0,0,0,${(h.bg_overlay ?? 40) / 100}), rgba(0,0,0,${(h.bg_overlay ?? 40) / 100})), url(${h.bg_image_url})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  };
+  if (h?.bg_type === 'color' && h.bg_color) return { background: h.bg_color };
+  // Default gradient fallback
+  return { background: 'linear-gradient(180deg, #F8F9FF 0%, #fff 60%)' };
+})()}>
         <div className="hero-logo">
           <div className="logo-float">
             <div className="logo-pulse">

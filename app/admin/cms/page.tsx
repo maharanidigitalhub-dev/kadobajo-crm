@@ -69,31 +69,34 @@ export default function CMSPage() {
       const data = await res.json();
       if (res.ok && data.success) { setStatus('saved'); setTimeout(() => setStatus('idle'), 2500); }
       else { setStatus('error'); setTimeout(() => setStatus('idle'), 3000); }
-    } catch { setStatus('error'); setTimeout(() => setStatus('idle'), 3000); }
-  }
+    } catch { setStatus('error'); setTimeout(() => setStatus('idle'), async function handleImageUpload(file: File) {
+  setUploadError('');
+  if (file.size > 5 * 1024 * 1024) { setUploadError('File terlalu besar. Max 5MB.'); return; }
+  if (!file.type.startsWith('image/')) { setUploadError('Hanya file gambar yang diizinkan.'); return; }
 
-  async function handleImageUpload(file: File) {
-    setUploadError('');
-    if (file.size > 5 * 1024 * 1024) { setUploadError('File terlalu besar. Max 5MB.'); return; }
-    if (!file.type.startsWith('image/')) { setUploadError('Hanya file gambar yang diizinkan.'); return; }
+  setUploading(true);
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
 
-    setUploading(true);
-    try {
-      // Convert to base64 data URL for preview & storage
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        setContent(prev => ({
-          ...prev,
-          hero: { ...prev.hero, bg_image_url: dataUrl, bg_type: 'image' }
-        }));
-        setUploading(false);
-      };
-      reader.onerror = () => { setUploadError('Gagal membaca file.'); setUploading(false); };
-      reader.readAsDataURL(file);
-    } catch { setUploadError('Upload gagal.'); setUploading(false); }
-  }
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
 
+    if (!res.ok || !data.url) {
+      setUploadError(data.error ?? 'Upload gagal. Coba lagi.');
+      setUploading(false);
+      return;
+    }
+
+    setContent(prev => ({
+      ...prev,
+      hero: { ...prev.hero, bg_image_url: data.url, bg_type: 'image' }
+    }));
+  } catch { setUploadError('Upload gagal. Coba lagi.'); }
+  finally { setUploading(false); }
+}
+  
+  
   function updateHero(key: keyof CMSContent['hero'], val: string | number) {
     setContent(prev => ({ ...prev, hero: { ...prev.hero, [key]: val } }));
   }

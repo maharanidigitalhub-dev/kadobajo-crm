@@ -85,8 +85,8 @@
   min-height:100vh; display:flex; flex-direction:column;
   align-items:center; justify-content:center; text-align:center;
   padding:120px 24px 80px;
-  background:linear-gradient(180deg,#F8F9FF 0%,#fff 60%);
   position:relative; overflow:hidden;
+  /* background controlled by CMS inline style on page.tsx */
 }
 .hero::before {
   content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);

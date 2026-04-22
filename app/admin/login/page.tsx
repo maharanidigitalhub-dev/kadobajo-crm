@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -21,8 +20,12 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (res.ok) { router.push('/dashboard'); router.refresh(); }
-      else setError('Email atau password salah.');
+      if (res.ok) {
+        router.push('/admin/dashboard');
+        router.refresh();
+      } else {
+        setError('Email atau password salah.');
+      }
     } catch {
       setError('Terjadi kesalahan. Coba lagi.');
     } finally {
@@ -31,120 +34,150 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-root">
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(160deg, #F0F3FD 0%, #F8F9FF 50%, #EEF1FB 100%)',
+      fontFamily: "'DM Sans', sans-serif",
+      padding: '24px',
+    }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        .login-root {
-          min-height: 100vh; display: flex; align-items: center; justify-content: center;
-          padding: 24px; background: #F8F9FF; font-family: 'DM Sans', sans-serif;
-        }
-        .login-bg {
-          position: fixed; inset: 0;
-          background: radial-gradient(ellipse at top, rgba(45,63,143,0.07) 0%, transparent 60%);
-          pointer-events: none;
-        }
-        .login-wrap { position: relative; width: 100%; max-width: 360px; }
-
-        /* Logo area */
-        .login-logo-wrap { text-align: center; margin-bottom: 32px; }
-        .login-logo {
-          border-radius: 50%; object-fit: cover;
-          box-shadow: 0 8px 24px rgba(45,63,143,0.2);
-          animation: pulse-ring 2.5s ease infinite;
-        }
-        @keyframes pulse-ring {
-          0%   { box-shadow: 0 0 0 0   rgba(45,63,143,0.25); }
-          70%  { box-shadow: 0 0 0 14px rgba(45,63,143,0);   }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
+        @keyframes pulseRing {
+          0%   { box-shadow: 0 0 0 0   rgba(45,63,143,0.3); }
+          70%  { box-shadow: 0 0 0 18px rgba(45,63,143,0);   }
           100% { box-shadow: 0 0 0 0   rgba(45,63,143,0);    }
         }
-        .login-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #111827; margin-top: 14px; }
-        .login-sub { font-size: 13px; color: #6B7280; margin-top: 4px; }
-
-        /* Card */
-        .login-card {
-          background: #fff; border: 1.5px solid #E8ECF8; border-radius: 20px;
-          padding: 32px; box-shadow: 0 8px 40px rgba(45,63,143,0.1);
-        }
-        .login-card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #374151; margin-bottom: 24px; }
-
-        /* Form */
-        .login-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #6B7280; margin-bottom: 6px; }
-        .login-input {
-          width: 100%; padding: 12px 16px; border-radius: 12px;
-          border: 1.5px solid #E5E7EB; background: #F9FAFB;
-          color: #111827; font-size: 14px; font-family: 'DM Sans', sans-serif;
-          outline: none; transition: border-color 0.2s;
-        }
-        .login-input:focus { border-color: #2D3F8F; box-shadow: 0 0 0 3px rgba(45,63,143,0.1); }
-        .login-input::placeholder { color: #9CA3AF; }
-        .login-field { margin-bottom: 16px; }
-
-        /* Error */
-        .login-error { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; }
-        .login-error p { color: #DC2626; font-size: 13px; }
-
-        /* Button */
-        .login-btn {
-          width: 100%; padding: 13px; border-radius: 12px; border: none; cursor: pointer;
-          background: linear-gradient(135deg, #2D3F8F, #1B2A6B);
-          color: #fff; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-          transition: all 0.2s; margin-top: 8px;
-        }
-        .login-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,63,143,0.35); }
-        .login-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-        /* Spinner */
-        .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Back link */
-        .login-back { display: block; text-align: center; margin-top: 20px; font-size: 12px; color: #9CA3AF; text-decoration: none; transition: color 0.15s; }
-        .login-back:hover { color: #2D3F8F; }
+        .logo-pulse { animation: pulseRing 2.5s ease infinite; border-radius: 50%; display: inline-block; }
+        .fade-up { animation: fadeUp 0.6s ease forwards; }
+        .spin { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
+        .login-input:focus { border-color: #2D3F8F !important; box-shadow: 0 0 0 3px rgba(45,63,143,0.12) !important; background: white !important; }
+        .login-input::placeholder { color: #9CA3AF; }
+        .login-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(45,63,143,0.35) !important; }
+        .login-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .back-link:hover { color: #2D3F8F !important; }
       `}</style>
 
-      <div className="login-bg" />
+      <div className="fade-up" style={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
 
-      <div className="login-wrap">
         {/* Logo */}
-        <div className="login-logo-wrap">
-          <Image src="/logo.png" alt="Kado Bajo" width={80} height={80} className="login-logo" />
-          <div className="login-title">Kado Bajo</div>
-          <div className="login-sub">Admin CRM Dashboard</div>
+        <div style={{ marginBottom: 28 }}>
+          <div className="logo-pulse" style={{ display: 'inline-block' }}>
+            <Image
+              src="/logo.png"
+              alt="Kado Bajo"
+              width={140}
+              height={140}
+              style={{
+                borderRadius: '50%',
+                objectFit: 'cover',
+                display: 'block',
+                boxShadow: '0 16px 48px rgba(45,63,143,0.25)',
+              }}
+            />
+          </div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#111827', marginTop: 20, marginBottom: 4 }}>
+            Kado Bajo
+          </h1>
+          <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>Admin CRM Dashboard</p>
         </div>
 
         {/* Card */}
-        <div className="login-card">
-          <div className="login-card-title">Masuk ke Dashboard</div>
+        <div style={{
+          background: 'white',
+          border: '1.5px solid #E8ECF8',
+          borderRadius: 20,
+          padding: '32px 28px',
+          boxShadow: '0 8px 48px rgba(45,63,143,0.1)',
+        }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#374151', marginBottom: 24, textAlign: 'left' }}>
+            Masuk ke Dashboard
+          </h2>
 
           <form onSubmit={handleSubmit}>
-            <div className="login-field">
-              <label className="login-label">Email</label>
-              <input type="email" className="login-input" value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="admin@kadobajo.com" autoComplete="email" />
+            {/* Email */}
+            <div style={{ marginBottom: 16, textAlign: 'left' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#9CA3AF', marginBottom: 6 }}>
+                Email
+              </label>
+              <input
+                type="email"
+                className="login-input"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
+                placeholder="admin@kadobajo.com"
+                autoComplete="email"
+                style={{
+                  width: '100%', padding: '12px 16px', borderRadius: 12,
+                  border: '1.5px solid #E5E7EB', background: '#F9FAFB',
+                  color: '#111827', fontSize: 14, outline: 'none',
+                  transition: 'all 0.2s', boxSizing: 'border-box',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              />
             </div>
 
-            <div className="login-field">
-              <label className="login-label">Password</label>
-              <input type="password" className="login-input" value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••" autoComplete="current-password" />
+            {/* Password */}
+            <div style={{ marginBottom: 20, textAlign: 'left' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#9CA3AF', marginBottom: 6 }}>
+                Password
+              </label>
+              <input
+                type="password"
+                className="login-input"
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+                placeholder="••••••"
+                autoComplete="current-password"
+                style={{
+                  width: '100%', padding: '12px 16px', borderRadius: 12,
+                  border: '1.5px solid #E5E7EB', background: '#F9FAFB',
+                  color: '#111827', fontSize: 14, outline: 'none',
+                  transition: 'all 0.2s', boxSizing: 'border-box',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              />
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="login-error"><p>{error}</p></div>
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#DC2626', textAlign: 'left' }}>
+                {error}
+              </div>
             )}
 
-            <button type="submit" className="login-btn" disabled={loading}>
-              {loading ? <><span className="spin" />Masuk…</> : 'Masuk'}
+            {/* Submit */}
+            <button
+              type="submit"
+              className="login-btn"
+              disabled={loading}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #2D3F8F, #1B2A6B)',
+                color: 'white', fontSize: 15, fontWeight: 700,
+                fontFamily: "'DM Sans', sans-serif",
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'all 0.2s',
+              }}
+            >
+              {loading ? <><span className="spin" /> Masuk…</> : 'Masuk'}
             </button>
           </form>
         </div>
 
-        
+        {/* Back link */}
+        <a
+          href="https://kadobajo.id"
+          className="back-link"
+          style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#9CA3AF', textDecoration: 'none', transition: 'color 0.15s' }}
+        >
+          ← Kembali ke kadobajo.id
+        </a>
       </div>
     </div>
   );

@@ -15,6 +15,11 @@ const STATUS_OPTIONS = [
 
 const SOURCE_OPTIONS = [
   { value: '', label: 'All Sources' },
+  { value: 'lp', label: 'lp' },
+  { value: 'lp-2', label: 'lp-2' },
+  { value: 'lp-3', label: 'lp-3' },
+  { value: 'lp-4', label: 'lp-4' },
+  { value: 'lp-5', label: 'lp-5' },
   { value: 'facebook', label: 'Facebook' },
   { value: 'instagram', label: 'Instagram' },
   { value: 'google', label: 'Google' },
@@ -108,7 +113,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     return customers.filter((c) => {
       const matchStatus = !filterStatus || c.status === filterStatus;
       const matchCountry = !filterCountry || c.country === filterCountry;
-      const matchSource = !filterSource || c.utm_source === filterSource || c.source === filterSource;
+      const matchSource = !filterSource || c.source_slug === filterSource || c.utm_source === filterSource || c.source === filterSource;
       const q = search.toLowerCase();
       const matchSearch = !q || c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.email.toLowerCase().includes(q);
       return matchStatus && matchCountry && matchSource && matchSearch;
@@ -225,7 +230,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           <table className="w-full">
             <thead>
               <tr className="bg-[#F5F3EF] border-b border-[#E8DFD0]">
-                {['Name', 'Phone', 'Email', 'Country', 'Device', 'Source / UTM', 'Status', 'Date'].map((h) => (
+                {['Name', 'Phone', 'Email', 'Source Slug', 'Audience', 'Country', 'Device', 'Source / UTM', 'Status', 'Date'].map((h) => (
                   <th key={h} className="text-left px-4 py-3.5 text-xs font-semibold text-[#8B7355] uppercase tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -233,7 +238,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-16 text-[#A89080] text-sm">
+                  <td colSpan={10} className="text-center py-16 text-[#A89080] text-sm">
                     {search || filterStatus || filterCountry || filterSource ? 'No results found.' : 'No customers yet.'}
                   </td>
                 </tr>
@@ -248,6 +253,12 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     </td>
                     <td className="px-4 py-3.5">
                       <p className="text-xs text-[#6B4C3B] truncate max-w-[150px]">{c.email || '—'}</p>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-medium text-[#4A2C1A]">{c.source_slug ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs text-[#6B4C3B]">{c.audience_segment ?? '—'}</span>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="text-xs font-medium text-[#4A2C1A]">{c.country ?? '—'}</span>

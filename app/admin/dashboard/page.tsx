@@ -37,6 +37,8 @@ export default async function DashboardPage() {
 
   const counts = countByStatus(all);
   const revenue = all.reduce((sum, c) => sum + (c.value ?? 0), 0);
+  const landingSources = ['lp', 'lp-2', 'lp-3', 'lp-4', 'lp-5'] as const;
+  const leadsByLanding = landingSources.map((slug) => ({ slug, count: all.filter((c) => c.source_slug === slug).length }));
 
   const stats = [
     { label: 'Total Leads',   value: all.length,    icon: '👥', color: '#2D3F8F', bg: '#F0F3FD' },
@@ -96,6 +98,19 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1.5px solid #E8ECF8' }}>
+          <h2 className="font-semibold text-base mb-4" style={{ color: '#111827' }}>Leads per Landing Page</h2>
+          <div className="space-y-2">
+            {leadsByLanding.map((item) => (
+              <div key={item.slug} className="flex items-center justify-between text-sm">
+                <span style={{ color: '#374151' }}>{item.slug}</span>
+                <span style={{ color: '#1B2A6B', fontWeight: 700 }}>{item.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Pipeline */}
         <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1.5px solid #E8ECF8' }}>
           <h2 className="font-semibold text-base mb-4" style={{ color: '#111827' }}>Pipeline Summary</h2>

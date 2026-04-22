@@ -9,6 +9,9 @@ export interface Customer {
   city: string | null;
   status: CustomerStatus;
   source: string;
+  source_slug: string | null;
+  audience_segment: string | null;
+  landing_url: string | null;
   utm_source: string | null;   // e.g. facebook, google, tiktok
   utm_medium: string | null;   // e.g. cpc, paid_social
   utm_campaign: string | null; // e.g. honeymoon_eu, komodo_aus

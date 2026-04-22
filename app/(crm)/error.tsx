@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 export default function CRMError({
@@ -50,10 +51,10 @@ export default function CRMError({
             style={{ background: 'linear-gradient(135deg, #2D3F8F, #1B2A6B)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>
             Coba Lagi
           </button>
-          <a href="/dashboard"
+          <Link href="/dashboard"
             style={{ background: '#F3F4F6', color: '#374151', padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
             Refresh
-          </a>
+          </Link>
         </div>
       </div>
     </div>

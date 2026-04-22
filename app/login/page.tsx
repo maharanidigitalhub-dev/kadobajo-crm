@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -49,7 +50,7 @@ export default function LoginPage() {
         /* Logo area */
         .login-logo-wrap { text-align: center; margin-bottom: 32px; }
         .login-logo {
-          width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+          border-radius: 50%; object-fit: cover;
           box-shadow: 0 8px 24px rgba(45,63,143,0.2);
           animation: pulse-ring 2.5s ease infinite;
         }
@@ -109,7 +110,7 @@ export default function LoginPage() {
       <div className="login-wrap">
         {/* Logo */}
         <div className="login-logo-wrap">
-          <img src="/logo.png" alt="Kado Bajo" className="login-logo" />
+          <Image src="/logo.png" alt="Kado Bajo" width={80} height={80} className="login-logo" />
           <div className="login-title">Kado Bajo</div>
           <div className="login-sub">Admin CRM Dashboard</div>
         </div>

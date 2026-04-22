@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import { LP_DATA, VALID_SLUGS, type LPSlug } from '../lp-data';
 
 const WHATSAPP = '6282146970988';
@@ -68,10 +69,6 @@ export default function LandingPage() {
     }, 1200);
   }
 
-  const S = {
-    section: 'padding: 72px 24px; max-width: 960px; margin: 0 auto;',
-  };
-
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF', color: '#1a1209', minHeight: '100vh', overflowX: 'hidden' }}>
       <style>{`
@@ -120,7 +117,7 @@ export default function LandingPage() {
         transition:'all 0.3s',
       }} className={scrolled ? 'scrolled' : ''}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <img src="/logo.png" alt="Kado Bajo" style={{ width:32, height:32, borderRadius:'50%', objectFit:'cover' }} />
+          <Image src="/logo.png" alt="Kado Bajo" width={32} height={32} style={{ borderRadius:'50%', objectFit:'cover' }} />
           <span style={{ fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:15, color:'#1B2A6B', letterSpacing:1, textTransform:'uppercase' }}>Kado Bajo</span>
         </div>
         <button className="nav-cta" onClick={scrollToForm} style={{
@@ -137,7 +134,7 @@ export default function LandingPage() {
         <div className="fadeUp d1" style={{ marginBottom:28 }}>
           <div className="logo-float">
             <div className="logo-pulse">
-              <img src="/logo.png" alt="Kado Bajo" className="hero-logo-img" style={{ width:160, height:160, borderRadius:'50%', objectFit:'cover', display:'block', boxShadow:'0 12px 48px rgba(45,63,143,0.28)' }} />
+              <Image src="/logo.png" alt="Kado Bajo" width={160} height={160} className="hero-logo-img" style={{ borderRadius:'50%', objectFit:'cover', display:'block', boxShadow:'0 12px 48px rgba(45,63,143,0.28)' }} />
             </div>
           </div>
         </div>
@@ -199,7 +196,7 @@ export default function LandingPage() {
           <h2 className="serif" style={{ fontSize:32, color:'#1a1209', marginBottom:40 }}>How It Works</h2>
           <div className="steps-grid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:20 }}>
             {[
-              {n:'01',c:'#2D3F8F',title:'Order Online',desc:'Fill in the form below. Tell us your flight date, budget, and who you\'re buying for. 2 minutes.'},
+              {n:'01',c:'#2D3F8F',title:'Order Online',desc:'Fill in the form below. Tell us your flight date, budget, and who you&apos;re buying for. 2 minutes.'},
               {n:'02',c:'#b8922a',title:'We Prepare Everything',desc:'Your personal shopper selects, packs, and gift-wraps your entire order. You do nothing.'},
               {n:'03',c:'#2d5a3d',title:'Pick Up at the Airport',desc:'Come to Kado Bajo at Komodo Airport before check-in. Grab your order. Fly home.'},
             ].map(s => (
@@ -231,7 +228,7 @@ export default function LandingPage() {
       {/* ── 7. PRODUCTS ── */}
       <div style={{ background:'#F8F9FF', borderTop:'1px solid #E8ECF8', borderBottom:'1px solid #E8ECF8' }}>
         <section className="section" style={{ padding:'72px 24px', maxWidth:960, margin:'0 auto' }}>
-          <p style={{ fontSize:11, fontWeight:700, letterSpacing:2.5, textTransform:'uppercase', color:'#2D3F8F', marginBottom:12 }}>What's Inside</p>
+          <p style={{ fontSize:11, fontWeight:700, letterSpacing:2.5, textTransform:'uppercase', color:'#2D3F8F', marginBottom:12 }}>What&apos;s Inside</p>
           <h2 className="serif" style={{ fontSize:32, color:'#1a1209', marginBottom:32 }}>Our curated collection</h2>
           <div className="products-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:14 }}>
             {[
@@ -260,7 +257,7 @@ export default function LandingPage() {
           {lp.testimonials.map((t, i) => (
             <div key={i} style={{ background:'#F8F9FF', border:'1.5px solid #E8ECF8', borderRadius:14, padding:24 }}>
               <div style={{ color:'#F59E0B', fontSize:14, letterSpacing:2, marginBottom:12 }}>★★★★★</div>
-              <p style={{ fontSize:14, color:'#374151', lineHeight:1.75, fontStyle:'italic', marginBottom:16 }}>"{t.quote}"</p>
+              <p style={{ fontSize:14, color:'#374151', lineHeight:1.75, fontStyle:'italic', marginBottom:16 }}>&ldquo;{t.quote}&rdquo;</p>
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                 <span style={{ fontSize:20 }}>{t.flag}</span>
                 <div><div style={{ fontSize:13, fontWeight:700, color:'#1B2A6B' }}>{t.name}</div><div style={{ fontSize:11, color:'#7a6e61' }}>{t.location}</div></div>
@@ -284,7 +281,7 @@ export default function LandingPage() {
         <div ref={formRef} style={{ maxWidth:640, margin:'0 auto' }}>
           <div style={{ background:'white', border:'2px solid #E8ECF8', borderRadius:20, overflow:'hidden', boxShadow:'0 8px 48px rgba(45,63,143,0.12)' }}>
             <div style={{ background:'linear-gradient(135deg,#1B2A6B,#2D3F8F)', padding:'28px 32px', display:'flex', gap:16, alignItems:'center' }}>
-              <img src="/logo.png" alt="" style={{ width:56, height:56, borderRadius:'50%', objectFit:'cover', flexShrink:0, boxShadow:'0 0 0 2px rgba(255,255,255,0.2)' }} />
+              <Image src="/logo.png" alt="" width={56} height={56} style={{ borderRadius:'50%', objectFit:'cover', flexShrink:0, boxShadow:'0 0 0 2px rgba(255,255,255,0.2)' }} />
               <div>
                 <h2 className="serif" style={{ fontSize:18, color:'white', marginBottom:4, lineHeight:1.3 }}>{lp.form.headline}</h2>
                 <p style={{ fontSize:12, color:'rgba(255,255,255,0.6)' }}>{lp.form.subheadline}</p>
@@ -294,7 +291,7 @@ export default function LandingPage() {
               {submitted ? (
                 <div style={{ textAlign:'center', padding:'32px 0' }}>
                   <div style={{ fontSize:48, marginBottom:12 }}>✅</div>
-                  <h3 className="serif" style={{ fontSize:20, marginBottom:8 }}>You're all set!</h3>
+                  <h3 className="serif" style={{ fontSize:20, marginBottom:8 }}>You&apos;re all set!</h3>
                   <p style={{ color:'#7a6e61', fontSize:14 }}>Redirecting you to WhatsApp to confirm your order…</p>
                 </div>
               ) : (
@@ -328,7 +325,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <label style={{ display:'block', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#6B7280', marginBottom:6 }}>Anything Else?</label>
-                      <textarea className="form-input" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Budget, occasion, who you're buying for…" rows={3} style={{ width:'100%', padding:'12px 16px', borderRadius:10, border:'1.5px solid #E5E7EB', background:'#F9FAFB', fontSize:14, outline:'none', transition:'all 0.2s', fontFamily:"'DM Sans',sans-serif", color:'#111827', resize:'vertical' }} />
+                      <textarea className="form-input" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Budget, occasion, who you&apos;re buying for…" rows={3} style={{ width:'100%', padding:'12px 16px', borderRadius:10, border:'1.5px solid #E5E7EB', background:'#F9FAFB', fontSize:14, outline:'none', transition:'all 0.2s', fontFamily:"'DM Sans',sans-serif", color:'#111827', resize:'vertical' }} />
                     </div>
                   </div>
                   <div style={{ fontSize:12, color:'#6B7280', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8, padding:'10px 14px', marginBottom:20 }}>
@@ -384,7 +381,7 @@ export default function LandingPage() {
         <div style={{ maxWidth:960, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:28 }}>
           <div>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-              <img src="/logo.png" alt="" style={{ width:32, height:32, borderRadius:'50%', objectFit:'cover' }} />
+              <Image src="/logo.png" alt="" width={32} height={32} style={{ borderRadius:'50%', objectFit:'cover' }} />
               <span style={{ fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:14, color:'#1B2A6B' }}>Kado Bajo</span>
             </div>
             <p style={{ fontSize:13, color:'#6B7280', lineHeight:1.7 }}>The most complete NTT souvenir experience — at Komodo Airport.</p>

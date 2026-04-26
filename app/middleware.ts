@@ -1,31 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MAINTENANCE = process.env.MAINTENANCE_MODE === 'true';
-
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const auth = req.cookies.get('auth')?.value;
 
-  // ── MAINTENANCE MODE ──
-  if (MAINTENANCE) {
-    // LP → maintenance page
-    if (!pathname.startsWith('/admin') &&
-        !pathname.startsWith('/maintenance') &&
-        !pathname.startsWith('/api') &&
-        !pathname.startsWith('/_next') &&
-        !pathname.startsWith('/logo.png')) {
-      return NextResponse.redirect(new URL('/maintenance', req.url));
+  // Detect admin subdomain from ALL possible headers
+  const xForwardedHost = req.headers.get('x-forwarded-host') ?? '';
+  const host = req.headers.get('host') ?? '';
+  const isAdmin =
+    xForwardedHost === 'admin.kadobajo.id' ||
+    xForwardedHost.startsWith('admin.') ||
+    host === 'admin.kadobajo.id' ||
+    host.startsWith('admin.');
+
+  // ── ADMIN SUBDOMAIN DETECTED ──
+  if (isAdmin) {
+    // Root → redirect to login or dashboard
+    if (pathname === '/' || pathname === '') {
+      const dest = auth === 'true' ? '/admin/dashboard' : '/admin/login';
+      return NextResponse.redirect(new URL(dest, req.url));
     }
-    // Admin → admin maintenance page (tapi masih bisa akses /admin/login untuk override)
-    if (pathname.startsWith('/admin') &&
-        !pathname.startsWith('/admin/maintenance') &&
-        !pathname.startsWith('/admin/login') &&
-        !pathname.startsWith('/api')) {
-      return NextResponse.redirect(new URL('/admin/maintenance', req.url));
+
+    // /login on admin subdomain → /admin/login
+    if (pathname === '/login') {
+      return NextResponse.redirect(new URL('/admin/login', req.url));
+    }
+
+    // /dashboard on admin subdomain → /admin/dashboard
+    if (pathname === '/dashboard') {
+      return NextResponse.redirect(new URL('/admin/dashboard', req.url));
+    }
+
+    // /customers on admin subdomain → /admin/customers
+    if (pathname === '/customers') {
+      return NextResponse.redirect(new URL('/admin/customers', req.url));
+    }
+
+    // Block landing page from showing on admin subdomain
+    if (pathname === '/' || (!pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.match(/\.(png|jpg|ico|svg|webp)$/))) {
+      return NextResponse.redirect(new URL('/admin/login', req.url));
     }
   }
 
-  // ── ADMIN ROUTES ──
+  // ── ADMIN ROUTES (/admin/*) ──
   if (!pathname.startsWith('/admin')) return NextResponse.next();
 
   if (pathname === '/admin' || pathname === '/admin/') {
@@ -47,5 +64,7 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png|api/).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|logo.png).*)',
+  ],
 };

@@ -260,7 +260,7 @@ export default function LandingPage() {
           {lp.testimonials.map((t, i) => (
             <div key={i} style={{ background:'#F8F9FF', border:'1.5px solid #E8ECF8', borderRadius:14, padding:24 }}>
               <div style={{ color:'#F59E0B', fontSize:14, letterSpacing:2, marginBottom:12 }}>★★★★★</div>
-              <p style={{ fontSize:14, color:'#374151', lineHeight:1.75, fontStyle:'italic', marginBottom:16 }}>"{t.quote}"</p>
+              <p style={{ fontSize:14, color:'#374151', lineHeight:1.75, fontStyle:'italic', marginBottom:16 }}>&ldquo;{t.quote}&rdquo;</p>
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                 <span style={{ fontSize:20 }}>{t.flag}</span>
                 <div><div style={{ fontSize:13, fontWeight:700, color:'#1B2A6B' }}>{t.name}</div><div style={{ fontSize:11, color:'#7a6e61' }}>{t.location}</div></div>
@@ -294,8 +294,8 @@ export default function LandingPage() {
               {submitted ? (
                 <div style={{ textAlign:'center', padding:'32px 0' }}>
                   <div style={{ fontSize:48, marginBottom:12 }}>✅</div>
-                  <h3 className="serif" style={{ fontSize:20, marginBottom:8 }}>You're all set!</h3>
-                  <p style={{ color:'#7a6e61', fontSize:14 }}>Redirecting you to WhatsApp to confirm your order…</p>
+                  <h3 className="serif" style={{ fontSize:20, marginBottom:8 }}>You&apos;re all set!</h3>
+                  <p style={{ color:'#7a6e61', fontSize:14 }}>Redirecting you to WhatsApp to confirm your order&#8230;</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>

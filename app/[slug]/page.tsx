@@ -2,17 +2,14 @@ import { notFound } from 'next/navigation';
 import { LP_DATA, VALID_SLUGS, type LPSlug } from '../lp/lp-data';
 
 interface Props {
-  params: { slug: string };
-}
-
-export function generateStaticParams() {
-  return VALID_SLUGS.map(slug => ({ slug }));
+  params: Promise<{ lpSlug: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
-  const slug = params.slug as LPSlug;
-  if (!VALID_SLUGS.includes(slug)) return {};
-  const lp = LP_DATA[slug];
+  const { lpSlug } = await params;
+  const lpSlug = lpSlug as LPSlug;
+  if (!VALID_SLUGS.includes(lpSlug)) return {};
+  const lp = LP_DATA[lpSlug];
   return {
     title: lp.meta.title,
     description: lp.meta.description,
@@ -20,9 +17,11 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function LandingPage({ params }: Props) {
-  const slug = params.slug as LPSlug;
-  if (!VALID_SLUGS.includes(slug)) notFound();
+  const { lpSlug } = await params;
+  const lpSlug = lpSlug as LPSlug;
+  if (!VALID_SLUGS.includes(lpSlug)) notFound();
 
+  // ... sisa kode sama, ganti semua `lpSlug` dengan `lpSlug`
   // Ambil CMS overrides dari Supabase
   const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
   const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -37,12 +36,12 @@ export default async function LandingPage({ params }: Props) {
       }
     );
     const data = await res.json();
-    if (data?.[0]?.content?.lp_overrides?.[slug]) {
-      overrides = data[0].content.lp_overrides[slug];
+    if (data?.[0]?.content?.lp_overrides?.[lpSlug]) {
+      overrides = data[0].content.lp_overrides[lpSlug];
     }
   } catch {}
 
-  const lp = LP_DATA[slug];
+  const lp = LP_DATA[lpSlug];
 
   // Helper: pakai override kalau ada, fallback ke LP_DATA
   function get(key: string, fallback: any) {

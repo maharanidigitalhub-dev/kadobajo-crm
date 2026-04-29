@@ -62,9 +62,29 @@ export default async function LandingPage({ params }: Props) {
       : 'linear-gradient(160deg, #F0F3FD, #F8F9FF)';
 
   const isImage = bgType === 'image' && bgImageUrl;
-  const textColor = isImage ? '#fff' : '#111827';
-  const subColor  = isImage ? 'rgba(255,255,255,0.9)' : '#6B7280';
-  const metaColor = isImage ? 'rgba(255,255,255,0.7)' : '#9CA3AF';
+
+  // Deteksi apakah background gelap atau terang
+  function isColorDark(hex: string): boolean {
+    const clean = hex.replace('#', '');
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance < 0.5;
+  }
+
+  const isDark =
+    isImage
+      ? bgOverlay >= 30
+      : bgType === 'color'
+      ? isColorDark(bgColor)
+      : false;
+
+  const textColor    = isDark ? '#FFFFFF' : '#111827';
+  const subColor     = isDark ? 'rgba(255,255,255,0.85)' : '#6B7280';
+  const metaColor    = isDark ? 'rgba(255,255,255,0.65)' : '#9CA3AF';
+  const emColor      = isDark ? '#93C5FD' : '#2D3F8F';
+  const eyebrowColor = isDark ? 'rgba(255,255,255,0.75)' : '#6B7280';
 
   return (
     <main style={{ fontFamily: "'DM Sans', sans-serif", minHeight: '100vh', background: '#F8F9FF' }}>
@@ -86,12 +106,12 @@ export default async function LandingPage({ params }: Props) {
           <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${bgOverlay / 100})` }} />
         )}
         <div style={{ position: 'relative', maxWidth: 720, margin: '0 auto' }}>
-          <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: isImage ? '#fff' : '#6B7280', marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: eyebrowColor, marginBottom: 16 }}>
             {get('hero_eyebrow', lp.hero.eyebrow)}
           </p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(28px, 5vw, 48px)', color: textColor, lineHeight: 1.2, marginBottom: 24 }}>
             {get('hero_headline', lp.hero.headline)}{' '}
-            <em style={{ color: isImage ? '#93C5FD' : '#2D3F8F', fontStyle: 'normal' }}>
+            <em style={{ color: emColor, fontStyle: 'normal' }}>
               {get('hero_headline_em', lp.hero.headlineEm)}
             </em>{' '}
             {get('hero_headline_end', lp.hero.headlineEnd)}

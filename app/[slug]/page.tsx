@@ -2,14 +2,18 @@ import { notFound } from 'next/navigation';
 import { LP_DATA, VALID_SLUGS, type LPSlug } from '../lp/lp-data';
 
 interface Props {
-  params: Promise<{ lpSlug: string }>;
+  params: Promise<{ slug: string }>;
+}
+
+export function generateStaticParams() {
+  return VALID_SLUGS.map(slug => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { lpSlug } = await params;
-  const lpSlug = lpSlug as LPSlug;
-  if (!VALID_SLUGS.includes(lpSlug)) return {};
-  const lp = LP_DATA[lpSlug];
+  const resolved = await params;
+  const slug = resolved.slug as LPSlug;
+  if (!VALID_SLUGS.includes(slug)) return {};
+  const lp = LP_DATA[slug];
   return {
     title: lp.meta.title,
     description: lp.meta.description,
@@ -17,12 +21,10 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function LandingPage({ params }: Props) {
-  const { lpSlug } = await params;
-  const lpSlug = lpSlug as LPSlug;
-  if (!VALID_SLUGS.includes(lpSlug)) notFound();
+  const resolved = await params;
+  const slug = resolved.slug as LPSlug;
+  if (!VALID_SLUGS.includes(slug)) notFound();
 
-  // ... sisa kode sama, ganti semua `lpSlug` dengan `lpSlug`
-  // Ambil CMS overrides dari Supabase
   const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
   const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
@@ -36,14 +38,13 @@ export default async function LandingPage({ params }: Props) {
       }
     );
     const data = await res.json();
-    if (data?.[0]?.content?.lp_overrides?.[lpSlug]) {
-      overrides = data[0].content.lp_overrides[lpSlug];
+    if (data?.[0]?.content?.lp_overrides?.[slug]) {
+      overrides = data[0].content.lp_overrides[slug];
     }
   } catch {}
 
-  const lp = LP_DATA[lpSlug];
+  const lp = LP_DATA[slug];
 
-  // Helper: pakai override kalau ada, fallback ke LP_DATA
   function get(key: string, fallback: any) {
     return overrides[key] !== undefined ? overrides[key] : fallback;
   }
@@ -60,9 +61,17 @@ export default async function LandingPage({ params }: Props) {
       ? bgColor
       : 'linear-gradient(160deg, #F0F3FD, #F8F9FF)';
 
+  const isImage = bgType === 'image' && bgImageUrl;
+  const textColor = isImage ? '#fff' : '#111827';
+  const subColor  = isImage ? 'rgba(255,255,255,0.9)' : '#6B7280';
+  const metaColor = isImage ? 'rgba(255,255,255,0.7)' : '#9CA3AF';
+
   return (
-    <main style={{ fontFamily: "'DM Sans', sans-serif", minHeight: '100vh' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
+    <main style={{ fontFamily: "'DM Sans', sans-serif", minHeight: '100vh', background: '#F8F9FF' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+      `}</style>
 
       {/* HERO */}
       <section style={{
@@ -73,19 +82,21 @@ export default async function LandingPage({ params }: Props) {
         padding: '80px 24px',
         textAlign: 'center',
       }}>
-        {bgType === 'image' && bgImageUrl && (
+        {isImage && (
           <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${bgOverlay / 100})` }} />
         )}
         <div style={{ position: 'relative', maxWidth: 720, margin: '0 auto' }}>
-          <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: bgType === 'image' ? '#fff' : '#6B7280', marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: isImage ? '#fff' : '#6B7280', marginBottom: 16 }}>
             {get('hero_eyebrow', lp.hero.eyebrow)}
           </p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(28px, 5vw, 48px)', color: bgType === 'image' ? '#fff' : '#111827', lineHeight: 1.2, marginBottom: 24 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(28px, 5vw, 48px)', color: textColor, lineHeight: 1.2, marginBottom: 24 }}>
             {get('hero_headline', lp.hero.headline)}{' '}
-            <em style={{ color: '#2D3F8F', fontStyle: 'normal' }}>{get('hero_headline_em', lp.hero.headlineEm)}</em>{' '}
+            <em style={{ color: isImage ? '#93C5FD' : '#2D3F8F', fontStyle: 'normal' }}>
+              {get('hero_headline_em', lp.hero.headlineEm)}
+            </em>{' '}
             {get('hero_headline_end', lp.hero.headlineEnd)}
           </h1>
-          <p style={{ fontSize: 18, color: bgType === 'image' ? 'rgba(255,255,255,0.9)' : '#6B7280', marginBottom: 32, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 18, color: subColor, marginBottom: 32, lineHeight: 1.6 }}>
             {get('hero_subheadline', lp.hero.subheadline)}
           </p>
           <a href="/#form" style={{
@@ -95,14 +106,14 @@ export default async function LandingPage({ params }: Props) {
           }}>
             {get('hero_cta', lp.hero.cta)}
           </a>
-          <p style={{ marginTop: 16, fontSize: 13, color: bgType === 'image' ? 'rgba(255,255,255,0.7)' : '#9CA3AF' }}>
+          <p style={{ marginTop: 16, fontSize: 13, color: metaColor }}>
             {get('hero_urgency', lp.hero.urgency)}
           </p>
         </div>
       </section>
 
       {/* BENEFITS */}
-      <section style={{ padding: '64px 24px', maxWidth: 900, margin: '0 auto' }}>
+      <section style={{ padding: '64px 24px', maxWidth: 960, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
           {lp.benefits.map((b, i) => (
             <div key={i} style={{ background: 'white', border: '1.5px solid #E8ECF8', borderRadius: 16, padding: 24 }}>
@@ -115,17 +126,17 @@ export default async function LandingPage({ params }: Props) {
       </section>
 
       {/* TESTIMONIALS */}
-      <section style={{ background: '#F8F9FF', padding: '64px 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, textAlign: 'center', marginBottom: 40 }}>
+      <section style={{ background: 'white', padding: '64px 24px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, textAlign: 'center', color: '#111827', marginBottom: 40 }}>
             What Travellers Say
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
             {lp.testimonials.map((t, i) => (
-              <div key={i} style={{ background: 'white', border: '1.5px solid #E8ECF8', borderRadius: 16, padding: 24 }}>
+              <div key={i} style={{ background: '#F8F9FF', border: '1.5px solid #E8ECF8', borderRadius: 16, padding: 24 }}>
                 <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: 16 }}>"{t.quote}"</p>
-                <p style={{ fontWeight: 700, fontSize: 14 }}>{t.flag} {t.name}</p>
-                <p style={{ fontSize: 12, color: '#9CA3AF' }}>{t.location}</p>
+                <p style={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>{t.flag} {t.name}</p>
+                <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 4 }}>{t.location}</p>
               </div>
             ))}
           </div>
@@ -134,7 +145,7 @@ export default async function LandingPage({ params }: Props) {
 
       {/* FAQ */}
       <section style={{ padding: '64px 24px', maxWidth: 720, margin: '0 auto' }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, textAlign: 'center', marginBottom: 40 }}>FAQ</h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, textAlign: 'center', color: '#111827', marginBottom: 40 }}>FAQ</h2>
         {lp.faqs.map((faq, i) => (
           <div key={i} style={{ borderBottom: '1px solid #E5E7EB', paddingBottom: 20, marginBottom: 20 }}>
             <p style={{ fontWeight: 700, color: '#111827', marginBottom: 8 }}>
@@ -152,7 +163,7 @@ export default async function LandingPage({ params }: Props) {
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: 'white', marginBottom: 16 }}>
           {get('final_cta_headline', lp.finalCta.headline)}
         </h2>
-        <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 32, fontSize: 16 }}>
+        <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 32, fontSize: 16, maxWidth: 560, margin: '0 auto 32px' }}>
           {get('final_cta_body', lp.finalCta.body)}
         </p>
         <a href="/#form" style={{

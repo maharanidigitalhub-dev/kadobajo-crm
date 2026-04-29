@@ -1,101 +1,66 @@
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { getUserByEmail, updateLastLogin } from '@/lib/auth';
 
-const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-
-export type UserRole = 'admin' | 'editor' | 'viewer';
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  is_active: boolean;
-  created_at: string;
-  last_login?: string;
-}
-
-// Headers pakai service role key (bypass RLS)
-const serviceHeaders = () => ({
-  apikey: SERVICE_KEY,
-  Authorization: `Bearer ${SERVICE_KEY}`,
-  'Content-Type': 'application/json',
-});
-
-// Get current logged-in user dari cookie session
-export async function getCurrentUser(): Promise<AdminUser | null> {
+export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('user_id')?.value;
-    if (!userId) return null;
+    const { email, password } = await req.json();
 
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_users?id=eq.${userId}&is_active=eq.true&select=id,email,name,role,is_active,created_at,last_login`,
-      { headers: serviceHeaders(), cache: 'no-store' }
-    );
-    const data = await res.json();
-    return data?.[0] ?? null;
-  } catch {
-    return null;
-  }
-}
-
-// Get user by email (untuk login)
-export async function getUserByEmail(email: string): Promise<(AdminUser & { password_hash: string }) | null> {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_users?email=eq.${encodeURIComponent(email)}&is_active=eq.true&select=*`,
-      { headers: serviceHeaders(), cache: 'no-store' }
-    );
-    const data = await res.json();
-    return data?.[0] ?? null;
-  } catch {
-    return null;
-  }
-}
-
-// Update last_login
-export async function updateLastLogin(userId: string) {
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/admin_users?id=eq.${userId}`,
-    {
-      method: 'PATCH',
-      headers: serviceHeaders(),
-      body: JSON.stringify({ last_login: new Date().toISOString() }),
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email dan password wajib diisi' }, { status: 400 });
     }
-  );
-}
 
-// Get semua users (admin only)
-export async function getAllUsers(): Promise<AdminUser[]> {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_users?select=id,email,name,role,is_active,created_at,last_login&order=created_at.asc`,
-      { headers: serviceHeaders(), cache: 'no-store' }
-    );
-    return await res.json();
-  } catch {
-    return [];
+    // Cari user di Supabase
+    const user = await getUserByEmail(email.toLowerCase().trim());
+    if (!user) {
+      return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 });
+    }
+
+    // Verifikasi password
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 });
+    }
+
+    // Update last login
+    await updateLastLogin(user.id);
+
+    // Set cookies
+    const res = NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+
+    const cookieOpts = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 hari
+    };
+
+    res.cookies.set('auth', 'true', cookieOpts);
+    res.cookies.set('user_id', user.id, cookieOpts);
+    res.cookies.set('user_role', user.role, cookieOpts);
+    res.cookies.set('user_name', user.name, cookieOpts);
+
+    return res;
+  } catch (err) {
+    console.error('[auth POST]', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
-// Permission checks
-export const PERMISSIONS = {
-  canManageUsers: (role: UserRole) => role === 'admin',
-  canEditCMS:     (role: UserRole) => role === 'admin' || role === 'editor',
-  canEditCustomers: (role: UserRole) => role === 'admin' || role === 'editor',
-  canExportCSV:   (role: UserRole) => role === 'admin' || role === 'editor',
-  canViewDashboard: (role: UserRole) => true,
-} as const;
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-  admin: '👑 Admin',
-  editor: '✏️ Editor',
-  viewer: '👁️ Viewer',
-};
-
-export const ROLE_COLORS: Record<UserRole, string> = {
-  admin: '#DC2626',
-  editor: '#2D3F8F',
-  viewer: '#6B7280',
-};
+export async function DELETE() {
+  const res = NextResponse.json({ success: true });
+  res.cookies.delete('auth');
+  res.cookies.delete('user_id');
+  res.cookies.delete('user_role');
+  res.cookies.delete('user_name');
+  return res;
+}

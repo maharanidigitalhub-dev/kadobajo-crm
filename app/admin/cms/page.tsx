@@ -130,7 +130,7 @@ function CMSInner() {
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           {status === 'saved' && <span className="save-badge" style={{ fontSize:13, color:'#10B981', fontWeight:600 }}>✓ Tersimpan!</span>}
           {status === 'error' && <span className="save-badge" style={{ fontSize:13, color:'#EF4444', fontWeight:600 }}>✗ Gagal simpan</span>}
-          <a href={`/${activeSlug}`} target="_blank" rel="noreferrer"
+          <a href={`https://kadobajo.id/${activeSlug}`} target="_blank" rel="noreferrer"
             style={{ fontSize:13, color:'#6B7280', textDecoration:'none', padding:'8px 16px', border:'1.5px solid #E5E7EB', borderRadius:8 }}>
             Preview {activeSlug} ↗
           </a>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { LP_DATA, VALID_SLUGS, type LPSlug } from '../../lp/lp-data';
 
@@ -14,17 +14,16 @@ const SLUG_META: Record<LPSlug, { label: string; flag: string; color: string }> 
   'lp-5': { label: 'Indonesia',  flag: '🇮🇩', color: '#DC2626' },
 };
 
-export default function CMSPage() {
+// ── Inner component that uses useSearchParams (must be inside Suspense) ──
+function CMSInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // ── Sync active slug from URL ?slug= param ──
   const urlSlug = searchParams.get('slug') as LPSlug | null;
   const [activeSlug, setActiveSlug] = useState<LPSlug>(
     urlSlug && VALID_SLUGS.includes(urlSlug) ? urlSlug : 'lp'
   );
 
-  // Keep slug in sync when URL changes (navbar submenu click)
   useEffect(() => {
     if (urlSlug && VALID_SLUGS.includes(urlSlug) && urlSlug !== activeSlug) {
       setActiveSlug(urlSlug);
@@ -38,7 +37,6 @@ export default function CMSPage() {
   const [uploadError, setUploadError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Load CMS overrides
   useEffect(() => {
     fetch('/api/cms').then(r => r.ok ? r.json() : null).then(data => {
       if (data?.lp_overrides) setOverrides(data.lp_overrides);
@@ -59,7 +57,6 @@ export default function CMSPage() {
     return ov[path] !== undefined ? ov[path] : fallback;
   }
 
-  // ── Switch slug: update state + URL ──
   function switchSlug(slug: LPSlug) {
     setActiveSlug(slug);
     router.replace(`/admin/cms?slug=${slug}`, { scroll: false });
@@ -82,7 +79,7 @@ export default function CMSPage() {
 
   async function handleImageUpload(file: File) {
     setUploadError('');
-    // ── No size limit ──
+    // No size limit
     setUploading(true);
     try {
       const fd = new FormData();
@@ -178,105 +175,103 @@ export default function CMSPage() {
         ))}
       </div>
 
-      {/* ── HERO & BG SECTION ── */}
+      {/* ── HERO & BG ── */}
       {activeSection === 'hero' && (
-        <div>
-          <div style={S.card}>
-            <p style={{ fontSize:13, fontWeight:700, color:'#374151', marginBottom:16 }}>🖼️ Background Hero — {currentMeta.flag} {currentMeta.label}</p>
-            <div style={{ display:'flex', gap:8, marginBottom:20 }}>
-              {[['gradient','✨ Gradient'],['color','🎨 Solid Color'],['image','🖼️ Gambar']].map(([key, label]) => (
-                <button key={key} onClick={() => update('hero_bg_type', key)}
-                  style={{ padding:'10px 16px', borderRadius:10, border:`1.5px solid ${bgType === key ? currentMeta.color : '#E5E7EB'}`, cursor:'pointer', fontSize:13, fontWeight:600, background: bgType === key ? '#F0F3FD' : 'white', color: bgType === key ? currentMeta.color : '#6B7280', fontFamily:"'DM Sans',sans-serif" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {bgType === 'gradient' && (
-              <div style={{ background:'linear-gradient(160deg,#F0F3FD,#F8F9FF)', borderRadius:10, padding:16, textAlign:'center' }}>
-                <p style={{ fontSize:13, color:'#6B7280', margin:0 }}>✨ Gradient default biru-putih</p>
-              </div>
-            )}
-
-            {bgType === 'color' && (
-              <div>
-                <label style={S.label}>Warna Background</label>
-                <div style={{ display:'flex', gap:12 }}>
-                  <input type="color" value={bgColor} onChange={e => update('hero_bg_color', e.target.value)}
-                    style={{ width:56, height:44, borderRadius:10, border:'1.5px solid #E5E7EB', cursor:'pointer', padding:4 }} />
-                  <input style={S.input} value={bgColor} onChange={e => update('hero_bg_color', e.target.value)} placeholder="#F8F9FF" />
-                </div>
-                <div style={{ display:'flex', gap:8, marginTop:10, flexWrap:'wrap' }}>
-                  {['#F8F9FF','#FDF8F0','#0D1117','#1B2A6B','#2D3F8F','#FFFFFF','#1a1209','#F7F2EA'].map(c => (
-                    <button key={c} onClick={() => update('hero_bg_color', c)}
-                      style={{ width:32, height:32, borderRadius:8, background:c, border: bgColor === c ? `3px solid ${currentMeta.color}` : '1.5px solid #E5E7EB', cursor:'pointer' }} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {bgType === 'image' && (
-              <div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }}
-                  onChange={e => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0]); }} />
-
-                {bgImageUrl ? (
-                  <div style={{ position:'relative', borderRadius:12, overflow:'hidden', marginBottom:16 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={bgImageUrl} alt="Hero BG" style={{ width:'100%', height:180, objectFit:'cover', display:'block' }} />
-                    <div style={{ position:'absolute', inset:0, background:`rgba(0,0,0,${bgOverlay/100})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <span style={{ color:'white', fontSize:12, background:'rgba(0,0,0,0.5)', padding:'4px 10px', borderRadius:20 }}>Preview overlay {bgOverlay}%</span>
-                    </div>
-                    <button onClick={() => { update('hero_bg_image_url',''); update('hero_bg_type','gradient'); }}
-                      style={{ position:'absolute', top:8, right:8, background:'#EF4444', color:'white', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }}>
-                      ✕ Hapus
-                    </button>
-                  </div>
-                ) : (
-                  <div className="drop-zone" onClick={() => fileRef.current?.click()}
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImageUpload(f); }}>
-                    {uploading
-                      ? <span style={{ width:24, height:24, border:'3px solid #C7D0F0', borderTopColor:currentMeta.color, borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' }} />
-                      : <div>
-                          <div style={{ fontSize:32, marginBottom:8 }}>📸</div>
-                          <p style={{ fontWeight:600, color:'#374151', margin:'0 0 4px' }}>Klik atau drag gambar</p>
-                          <p style={{ fontSize:12, color:'#9CA3AF', margin:0 }}>JPG, PNG, WebP · Rekomendasi 1920×1080px</p>
-                        </div>
-                    }
-                  </div>
-                )}
-
-                {uploadError && (
-                  <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8, padding:'8px 12px', marginTop:8, fontSize:13, color:'#DC2626' }}>
-                    {uploadError}
-                  </div>
-                )}
-
-                <div style={{ marginTop:16 }}>
-                  <label style={S.label}>Atau masukkan URL gambar</label>
-                  <input style={S.input} value={bgImageUrl.startsWith('data:') ? '' : bgImageUrl}
-                    onChange={e => update('hero_bg_image_url', e.target.value)} placeholder="https://..." />
-                </div>
-
-                {bgImageUrl && (
-                  <div style={{ marginTop:16 }}>
-                    <label style={S.label}>Kegelapan Overlay: {bgOverlay}%</label>
-                    <input type="range" min={0} max={80} step={5} value={bgOverlay}
-                      onChange={e => update('hero_bg_overlay', Number(e.target.value))}
-                      style={{ width:'100%', accentColor:currentMeta.color }} />
-                    <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'#9CA3AF', marginTop:4 }}>
-                      <span>Terang</span><span>Gelap</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+        <div style={S.card}>
+          <p style={{ fontSize:13, fontWeight:700, color:'#374151', marginBottom:16 }}>🖼️ Background Hero — {currentMeta.flag} {currentMeta.label}</p>
+          <div style={{ display:'flex', gap:8, marginBottom:20 }}>
+            {[['gradient','✨ Gradient'],['color','🎨 Solid Color'],['image','🖼️ Gambar']].map(([key, label]) => (
+              <button key={key} onClick={() => update('hero_bg_type', key)}
+                style={{ padding:'10px 16px', borderRadius:10, border:`1.5px solid ${bgType === key ? currentMeta.color : '#E5E7EB'}`, cursor:'pointer', fontSize:13, fontWeight:600, background: bgType === key ? '#F0F3FD' : 'white', color: bgType === key ? currentMeta.color : '#6B7280', fontFamily:"'DM Sans',sans-serif" }}>
+                {label}
+              </button>
+            ))}
           </div>
+
+          {bgType === 'gradient' && (
+            <div style={{ background:'linear-gradient(160deg,#F0F3FD,#F8F9FF)', borderRadius:10, padding:16, textAlign:'center' }}>
+              <p style={{ fontSize:13, color:'#6B7280', margin:0 }}>✨ Gradient default biru-putih</p>
+            </div>
+          )}
+
+          {bgType === 'color' && (
+            <div>
+              <label style={S.label}>Warna Background</label>
+              <div style={{ display:'flex', gap:12 }}>
+                <input type="color" value={bgColor} onChange={e => update('hero_bg_color', e.target.value)}
+                  style={{ width:56, height:44, borderRadius:10, border:'1.5px solid #E5E7EB', cursor:'pointer', padding:4 }} />
+                <input style={S.input} value={bgColor} onChange={e => update('hero_bg_color', e.target.value)} placeholder="#F8F9FF" />
+              </div>
+              <div style={{ display:'flex', gap:8, marginTop:10, flexWrap:'wrap' }}>
+                {['#F8F9FF','#FDF8F0','#0D1117','#1B2A6B','#2D3F8F','#FFFFFF','#1a1209','#F7F2EA'].map(c => (
+                  <button key={c} onClick={() => update('hero_bg_color', c)}
+                    style={{ width:32, height:32, borderRadius:8, background:c, border: bgColor === c ? `3px solid ${currentMeta.color}` : '1.5px solid #E5E7EB', cursor:'pointer' }} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {bgType === 'image' && (
+            <div>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }}
+                onChange={e => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0]); }} />
+
+              {bgImageUrl ? (
+                <div style={{ position:'relative', borderRadius:12, overflow:'hidden', marginBottom:16 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={bgImageUrl} alt="Hero BG" style={{ width:'100%', height:180, objectFit:'cover', display:'block' }} />
+                  <div style={{ position:'absolute', inset:0, background:`rgba(0,0,0,${bgOverlay/100})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <span style={{ color:'white', fontSize:12, background:'rgba(0,0,0,0.5)', padding:'4px 10px', borderRadius:20 }}>Preview overlay {bgOverlay}%</span>
+                  </div>
+                  <button onClick={() => { update('hero_bg_image_url',''); update('hero_bg_type','gradient'); }}
+                    style={{ position:'absolute', top:8, right:8, background:'#EF4444', color:'white', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }}>
+                    ✕ Hapus
+                  </button>
+                </div>
+              ) : (
+                <div className="drop-zone" onClick={() => fileRef.current?.click()}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImageUpload(f); }}>
+                  {uploading
+                    ? <span style={{ width:24, height:24, border:'3px solid #C7D0F0', borderTopColor:currentMeta.color, borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' }} />
+                    : <div>
+                        <div style={{ fontSize:32, marginBottom:8 }}>📸</div>
+                        <p style={{ fontWeight:600, color:'#374151', margin:'0 0 4px' }}>Klik atau drag gambar</p>
+                        <p style={{ fontSize:12, color:'#9CA3AF', margin:0 }}>JPG, PNG, WebP · Rekomendasi 1920×1080px</p>
+                      </div>
+                  }
+                </div>
+              )}
+
+              {uploadError && (
+                <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8, padding:'8px 12px', marginTop:8, fontSize:13, color:'#DC2626' }}>
+                  {uploadError}
+                </div>
+              )}
+
+              <div style={{ marginTop:16 }}>
+                <label style={S.label}>Atau masukkan URL gambar</label>
+                <input style={S.input} value={bgImageUrl.startsWith('data:') ? '' : bgImageUrl}
+                  onChange={e => update('hero_bg_image_url', e.target.value)} placeholder="https://..." />
+              </div>
+
+              {bgImageUrl && (
+                <div style={{ marginTop:16 }}>
+                  <label style={S.label}>Kegelapan Overlay: {bgOverlay}%</label>
+                  <input type="range" min={0} max={80} step={5} value={bgOverlay}
+                    onChange={e => update('hero_bg_overlay', Number(e.target.value))}
+                    style={{ width:'100%', accentColor:currentMeta.color }} />
+                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'#9CA3AF', marginTop:4 }}>
+                    <span>Terang</span><span>Gelap</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      {/* ── COPY SECTION ── */}
+      {/* ── COPY ── */}
       {activeSection === 'copy' && (
         <div style={S.card}>
           <p style={{ fontSize:13, fontWeight:700, color:'#374151', marginBottom:20 }}>✍️ Teks — {currentMeta.flag} {currentMeta.label}</p>
@@ -284,18 +279,18 @@ export default function CMSPage() {
             💡 Kosongkan field untuk menggunakan copy default dari template. Isi hanya yang ingin di-override.
           </p>
           {[
-            { key:'hero_eyebrow',       label:'Eyebrow Text',         default: lp.hero.eyebrow,       placeholder:'Komodo Airport · Labuan Bajo · NTT' },
-            { key:'hero_headline',      label:'Hero Headline',        default: lp.hero.headline,      placeholder:'Override headline…', multiline:true },
-            { key:'hero_headline_em',   label:'Headline Emphasis',    default: lp.hero.headlineEm,    placeholder:'Ready at Komodo Airport' },
-            { key:'hero_headline_end',  label:'Headline End',         default: lp.hero.headlineEnd,   placeholder:'Before You Fly Home' },
-            { key:'hero_subheadline',   label:'Subheadline',          default: lp.hero.subheadline,   placeholder:'', multiline:true },
-            { key:'hero_cta',           label:'CTA Button Text',      default: lp.hero.cta,           placeholder:'Reserve My Gifts Now →' },
-            { key:'hero_urgency',       label:'Urgency Hook',         default: lp.hero.urgency,       placeholder:'⏰ Order before your flight…' },
-            { key:'form_headline',      label:'Form Headline',        default: lp.form.headline,      placeholder:'' },
-            { key:'form_subheadline',   label:'Form Sub-copy',        default: lp.form.subheadline,   placeholder:'' },
-            { key:'form_cta',           label:'Form CTA Button',      default: lp.form.cta,           placeholder:'' },
-            { key:'final_cta_headline', label:'Final CTA Headline',   default: lp.finalCta.headline,  placeholder:'' },
-            { key:'final_cta_body',     label:'Final CTA Body',       default: lp.finalCta.body,      placeholder:'', multiline:true },
+            { key:'hero_eyebrow',       label:'Eyebrow Text',       default: lp.hero.eyebrow },
+            { key:'hero_headline',      label:'Hero Headline',      default: lp.hero.headline,     multiline:true },
+            { key:'hero_headline_em',   label:'Headline Emphasis',  default: lp.hero.headlineEm },
+            { key:'hero_headline_end',  label:'Headline End',       default: lp.hero.headlineEnd },
+            { key:'hero_subheadline',   label:'Subheadline',        default: lp.hero.subheadline,  multiline:true },
+            { key:'hero_cta',           label:'CTA Button Text',    default: lp.hero.cta },
+            { key:'hero_urgency',       label:'Urgency Hook',       default: lp.hero.urgency },
+            { key:'form_headline',      label:'Form Headline',      default: lp.form.headline },
+            { key:'form_subheadline',   label:'Form Sub-copy',      default: lp.form.subheadline },
+            { key:'form_cta',           label:'Form CTA Button',    default: lp.form.cta },
+            { key:'final_cta_headline', label:'Final CTA Headline', default: lp.finalCta.headline },
+            { key:'final_cta_body',     label:'Final CTA Body',     default: lp.finalCta.body,     multiline:true },
           ].map(field => (
             <div key={field.key} style={S.fieldWrap}>
               <label style={S.label}>{field.label}</label>
@@ -313,7 +308,7 @@ export default function CMSPage() {
         </div>
       )}
 
-      {/* ── FAQ SECTION ── */}
+      {/* ── FAQ ── */}
       {activeSection === 'faqs' && (
         <div style={S.card}>
           <p style={{ fontSize:13, fontWeight:700, color:'#374151', marginBottom:8 }}>❓ FAQ — {currentMeta.flag} {currentMeta.label}</p>
@@ -337,5 +332,23 @@ export default function CMSPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// ── Suspense boundary required for useSearchParams ──
+function CMSFallback() {
+  return (
+    <div style={{ padding:32, display:'flex', alignItems:'center', justifyContent:'center', minHeight:200 }}>
+      <span style={{ width:24, height:24, border:'3px solid #E8ECF8', borderTopColor:'#2D3F8F', borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+export default function CMSPage() {
+  return (
+    <Suspense fallback={<CMSFallback />}>
+      <CMSInner />
+    </Suspense>
   );
 }

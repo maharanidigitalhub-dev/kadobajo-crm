@@ -1,8 +1,20 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import LogoutButton from '@/components/crm/AdminLogoutButton';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/admin/login';
+
+  // ── Login page: no sidebar, just render the page ──
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  // ── All other admin pages: full sidebar layout ──
   return (
     <div className="crm-root">
       <style>{`
@@ -10,7 +22,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         .crm-root { display:flex; min-height:100vh; background:#F8F9FF; font-family:'DM Sans',sans-serif; }
 
-        /* ── SIDEBAR ── */
         .crm-sidebar {
           width:240px; min-height:100vh; background:white;
           border-right:1.5px solid #E8ECF8;
@@ -26,26 +37,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .crm-logo-name { font-family:'Playfair Display',serif; font-size:14px; font-weight:700; color:#1B2A6B; line-height:1.2; }
         .crm-logo-sub  { font-size:10px; color:#9CA3AF; letter-spacing:0.5px; text-transform:uppercase; margin-top:1px; }
 
-        /* ── NAV ── */
         .crm-nav { flex:1; padding:12px 10px; overflow-y:auto; }
         .crm-nav-item {
           display:flex; align-items:center; gap:10px;
           padding:9px 12px; border-radius:8px;
           font-size:13px; font-weight:500; color:#6B7280;
-          text-decoration:none; transition:all 0.15s;
-          margin-bottom:2px;
+          text-decoration:none; transition:all 0.15s; margin-bottom:2px;
         }
         .crm-nav-item:hover { background:#F0F3FD; color:#2D3F8F; }
-        .crm-nav-item.active { background:#EEF2FF; color:#2D3F8F; font-weight:600; }
 
-        /* ── NAV GROUP LABEL ── */
         .crm-nav-group-label {
           font-size:10px; font-weight:700; text-transform:uppercase;
           letter-spacing:1px; color:#C4C9D4; padding:12px 12px 4px;
         }
 
-        /* ── SUBMENU ── */
-        .crm-submenu { padding-left:8px; margin-bottom:2px; }
+        .crm-submenu { padding-left:8px; }
         .crm-submenu-item {
           display:flex; align-items:center; gap:8px;
           padding:7px 12px 7px 16px; border-radius:8px;
@@ -55,21 +61,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         .crm-submenu-item::before {
           content:''; position:absolute; left:4px; top:50%; transform:translateY(-50%);
-          width:4px; height:4px; border-radius:50%; background:#C4C9D4;
-          transition:background 0.15s;
+          width:4px; height:4px; border-radius:50%; background:#C4C9D4; transition:background 0.15s;
         }
         .crm-submenu-item:hover { background:#F0F3FD; color:#2D3F8F; }
         .crm-submenu-item:hover::before { background:#2D3F8F; }
-        .crm-submenu-item.active { background:#EEF2FF; color:#2D3F8F; font-weight:600; }
-        .crm-submenu-item.active::before { background:#2D3F8F; }
 
-        /* ── FOOTER ── */
-        .crm-sidebar-footer {
-          padding:12px 10px;
-          border-top:1.5px solid #E8ECF8;
-        }
-
-        /* ── MAIN ── */
+        .crm-sidebar-footer { padding:12px 10px; border-top:1.5px solid #E8ECF8; }
         .crm-main { flex:1; margin-left:240px; min-height:100vh; background:#F8F9FF; }
 
         @media (max-width:768px) {
@@ -79,19 +76,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       `}</style>
 
       <aside className="crm-sidebar">
-        {/* Logo */}
         <div className="crm-sidebar-logo">
-          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36} style={{ borderRadius:'50%', objectFit:'cover', flexShrink:0 }} />
+          <Image src="/logo.png" alt="Kado Bajo" width={36} height={36}
+            style={{ borderRadius:'50%', objectFit:'cover', flexShrink:0 }} />
           <div>
             <div className="crm-logo-name">Kado Bajo</div>
             <div className="crm-logo-sub">CRM System</div>
           </div>
         </div>
 
-        {/* Nav */}
         <nav className="crm-nav">
-
-          {/* Dashboard */}
           <Link href="/admin/dashboard" className="crm-nav-item">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{width:16,height:16,flexShrink:0}}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -100,7 +94,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Dashboard
           </Link>
 
-          {/* Customers */}
           <Link href="/admin/customers" className="crm-nav-item">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{width:16,height:16,flexShrink:0}}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -109,7 +102,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Customers
           </Link>
 
-          {/* CMS Group */}
           <div className="crm-nav-group-label" style={{marginTop:8}}>Content</div>
 
           <Link href="/admin/cms" className="crm-nav-item">
@@ -120,13 +112,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Landing Pages CMS
           </Link>
 
-          {/* Submenu — LP 1-5 */}
           <div className="crm-submenu">
             {[
               { slug:'lp',   flag:'🌍', label:'Universal' },
-              { slug:'lp-2', flag:'🇺🇸', label:'EU / US' },
-              { slug:'lp-3', flag:'🇸🇬', label:'SEA' },
-              { slug:'lp-4', flag:'🇦🇺', label:'AUS / NZ' },
+              { slug:'lp-2', flag:'🇺🇸', label:'EU / US'  },
+              { slug:'lp-3', flag:'🇸🇬', label:'SEA'       },
+              { slug:'lp-4', flag:'🇦🇺', label:'AUS / NZ'  },
               { slug:'lp-5', flag:'🇮🇩', label:'Indonesia' },
             ].map(({ slug, flag, label }) => (
               <Link key={slug} href={`/admin/cms?slug=${slug}`} className="crm-submenu-item">
@@ -136,7 +127,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             ))}
           </div>
-
         </nav>
 
         <div className="crm-sidebar-footer">

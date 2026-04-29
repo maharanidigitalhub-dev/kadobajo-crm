@@ -2,58 +2,45 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const BUCKET = 'cms-images';
 
-const headers = () => ({
-  apikey: SUPABASE_KEY,
-  Authorization: `Bearer ${SUPABASE_KEY}`,
-  'Content-Type': 'application/json',
-  Prefer: 'resolution=merge-duplicates,return=representation',
-});
-
-export async function GET() {
+export async function POST(req: NextRequest) {
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/cms_content?id=eq.homepage&select=content`,
-      { headers: headers(), cache: 'no-store' }
-    );
-    const data = await res.json();
-    if (!res.ok || !data?.length) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-    return NextResponse.json(data[0].content, {
-      headers: { 'Cache-Control': 'no-store' },
-    });
-  } catch (err) {
-    console.error('[cms GET]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
-  }
-}
 
-export async function PUT(req: NextRequest) {
-  try {
-    const body = await req.json();
+    const ext = file.name.split('.').pop();
+    const fileName = `hero-${Date.now()}.${ext}`;
+    const arrayBuffer = await file.arrayBuffer();
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms_content`, {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify({
-        id: 'homepage',
-        content: body,
-        updated_at: new Date().toISOString(),
-      }),
-      cache: 'no-store',
-    });
-
-    const text = await res.text();
-    console.log('[cms PUT] status:', res.status, 'body:', text.slice(0, 200));
+    const res = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': file.type,
+          'x-upsert': 'true',
+        },
+        body: arrayBuffer,
+      }
+    );
 
     if (!res.ok) {
-      return NextResponse.json({ error: 'Failed to save', detail: text }, { status: 500 });
+      const err = await res.text();
+      return NextResponse.json({ error: 'Upload failed', detail: err }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`;
+    return NextResponse.json({ url: publicUrl });
+
   } catch (err) {
-    console.error('[cms PUT]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    console.error('[upload]', err);
+    return NextResponse.json({ error: 'Upload failed.' }, { status: 500 });
   }
 }

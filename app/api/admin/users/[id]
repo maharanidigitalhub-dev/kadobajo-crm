@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { getCurrentUser, PERMISSIONS } from '@/lib/auth';
+
+const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
+
+const serviceHeaders = () => ({
+  apikey: SERVICE_KEY,
+  Authorization: `Bearer ${SERVICE_KEY}`,
+  'Content-Type': 'application/json',
+  Prefer: 'return=representation',
+});
+
+// PATCH — update user
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || !PERMISSIONS.canManageUsers(currentUser.role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    const body = await req.json();
+    const updates: Record<string, any> = {};
+
+    if (body.name) updates.name = body.name;
+    if (body.role && ['admin', 'editor', 'viewer'].includes(body.role)) updates.role = body.role;
+    if (typeof body.is_active === 'boolean') updates.is_active = body.is_active;
+    if (body.password) {
+      if (body.password.length < 8) {
+        return NextResponse.json({ error: 'Password minimal 8 karakter' }, { status: 400 });
+      }
+      updates.password_hash = await bcrypt.hash(body.password, 10);
+    }
+
+    // Prevent admin from deactivating themselves
+    if (id === currentUser.id && typeof body.is_active === 'boolean' && !body.is_active) {
+      return NextResponse.json({ error: 'Tidak bisa menonaktifkan akun sendiri' }, { status: 400 });
+    }
+
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/admin_users?id=eq.${id}`,
+      {
+        method: 'PATCH',
+        headers: serviceHeaders(),
+        body: JSON.stringify(updates),
+      }
+    );
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Gagal update user' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('[users PATCH]', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+// DELETE — hapus user
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || !PERMISSIONS.canManageUsers(currentUser.role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    if (id === currentUser.id) {
+      return NextResponse.json({ error: 'Tidak bisa menghapus akun sendiri' }, { status: 400 });
+    }
+
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/admin_users?id=eq.${id}`,
+      { method: 'DELETE', headers: serviceHeaders() }
+    );
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Gagal hapus user' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('[users DELETE]', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

@@ -1,86 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-type UserRole = 'admin' | 'editor' | 'viewer';
+type Role = 'admin' | 'manager' | 'sales' | 'viewer';
 
-// Route permissions — siapa yang boleh akses
-const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
-  '/admin/users': ['admin'],
-  '/admin/cms':   ['admin', 'editor'],
+const ROLE_ACCESS: Record<string, Role[]> = {
+  '/admin/dashboard':  ['admin', 'manager', 'sales', 'viewer'],
+  '/admin/customers':  ['admin', 'manager', 'sales', 'viewer'],
+  '/admin/cms':        ['admin'],
+  '/admin/users':      ['admin'],
 };
 
-function canAccess(pathname: string, role: UserRole | null): boolean {
-  if (!role) return false;
-  for (const [route, allowed] of Object.entries(ROUTE_PERMISSIONS)) {
-    if (pathname.startsWith(route)) {
-      return allowed.includes(role);
-    }
-  }
-  // Route lain yang tidak didefinisikan — semua role boleh akses
-  return true;
+function canAccess(path: string, role: Role): boolean {
+  const match = Object.keys(ROLE_ACCESS).find(p => path.startsWith(p));
+  if (!match) return true;
+  return ROLE_ACCESS[match].includes(role);
 }
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const auth     = req.cookies.get('auth')?.value;
-  const userRole = req.cookies.get('user_role')?.value as UserRole | null;
+  const auth = req.cookies.get('auth')?.value;
+  const role = (req.cookies.get('auth_role')?.value ?? 'viewer') as Role;
 
-  const xForwardedHost = req.headers.get('x-forwarded-host') ?? '';
-  const host           = req.headers.get('host') ?? '';
-  const isAdmin =
-    xForwardedHost === 'admin.kadobajo.id' ||
-    xForwardedHost.startsWith('admin.') ||
-    host === 'admin.kadobajo.id' ||
-    host.startsWith('admin.');
+  // Detect admin subdomain
+  const xHost = req.headers.get('x-forwarded-host') ?? '';
+  const host  = req.headers.get('host') ?? '';
+  const isAdminDomain = xHost.includes('admin.') || host.includes('admin.');
 
-  // ── ADMIN SUBDOMAIN ──
-  if (isAdmin) {
-    if (pathname === '/' || pathname === '') {
-      const dest = auth === 'true' ? '/admin/dashboard' : '/admin/login';
-      return NextResponse.redirect(new URL(dest, req.url));
-    }
-    if (pathname === '/login')     return NextResponse.redirect(new URL('/admin/login', req.url));
-    if (pathname === '/dashboard') return NextResponse.redirect(new URL('/admin/dashboard', req.url));
-    if (pathname === '/customers') return NextResponse.redirect(new URL('/admin/customers', req.url));
-    if (pathname === '/users')     return NextResponse.redirect(new URL('/admin/users', req.url));
-
-    if (!pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.match(/\.(png|jpg|ico|svg|webp)$/)) {
-      return NextResponse.redirect(new URL('/admin/login', req.url));
-    }
+  if (isAdminDomain && !pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.match(/\.(png|jpg|ico|svg|webp|css|js)$/)) {
+    return NextResponse.redirect(new URL(auth === 'true' ? '/admin/dashboard' : '/admin/login', req.url));
   }
 
-  // ── ADMIN ROUTES (/admin/*) ──
   if (!pathname.startsWith('/admin')) return NextResponse.next();
 
+  // Root redirect
   if (pathname === '/admin' || pathname === '/admin/') {
-    return NextResponse.redirect(
-      new URL(auth === 'true' ? '/admin/dashboard' : '/admin/login', req.url)
-    );
+    return NextResponse.redirect(new URL(auth === 'true' ? '/admin/dashboard' : '/admin/login', req.url));
   }
 
-  // Belum login
-  const protectedPaths = ['/admin/dashboard', '/admin/customers', '/admin/cms', '/admin/users'];
-  if (protectedPaths.some(p => pathname.startsWith(p)) && auth !== 'true') {
+  // Require auth
+  if (pathname !== '/admin/login' && auth !== 'true') {
     return NextResponse.redirect(new URL('/admin/login', req.url));
   }
 
-  // Sudah login tapi buka /login
+  // Already logged in → skip login
   if (pathname === '/admin/login' && auth === 'true') {
     return NextResponse.redirect(new URL('/admin/dashboard', req.url));
   }
 
-  // Cek permission berdasarkan role
-  if (auth === 'true' && userRole) {
-    if (!canAccess(pathname, userRole)) {
-      // Redirect ke dashboard dengan pesan unauthorized
-      const url = new URL('/admin/dashboard', req.url);
-      url.searchParams.set('error', 'unauthorized');
-      return NextResponse.redirect(url);
-    }
+  // Role-based access
+  if (auth === 'true' && !canAccess(pathname, role)) {
+    return NextResponse.redirect(new URL('/admin/dashboard?error=forbidden', req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png|api/).*)',],
 };

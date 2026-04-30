@@ -10,10 +10,13 @@ async function requireAdmin() {
   return cookieStore.get('auth_role')?.value === 'admin';
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+type Params = { params: Promise<{ id: string }> };
+
+export async function PATCH(req: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const { id } = await params;
   const body = await req.json();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/crm_users?id=eq.${params.id}`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/crm_users?id=eq.${id}`, {
     method: 'PATCH',
     headers: { ...H, Prefer: 'return=representation' },
     body: JSON.stringify(body),
@@ -23,10 +26,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ success: true, user: data[0] });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  // Soft delete — set active = false
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/crm_users?id=eq.${params.id}`, {
+  const { id } = await params;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/crm_users?id=eq.${id}`, {
     method: 'PATCH',
     headers: { ...H, Prefer: 'return=representation' },
     body: JSON.stringify({ active: false }),

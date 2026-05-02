@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import AdminSidebar from '@/components/crm/AdminSidebar';
 import { type Role } from '@/lib/roles';
 
@@ -8,6 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const role = (cookieStore.get('auth_role')?.value ?? 'viewer') as Role;
   const name = cookieStore.get('auth_name')?.value ?? 'Admin';
 
+  // Login page — no sidebar
   if (auth !== 'true') {
     return <>{children}</>;
   }

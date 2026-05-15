@@ -16,11 +16,18 @@ export default function ApprovalPage() {
   }, [activeTab]);
 
   async function handleAction(id: string, action: 'approve' | 'reject', note = '') {
+<<<<<<< HEAD
     // BUGFIX: Hapus reviewed_by hardcoded 'MANAGER_USER_ID' — server sudah baca dari cookie auth_id
     await fetch(`/api/approval/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, note }),
+=======
+    await fetch(`/api/approval/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, reviewed_by: 'MANAGER_USER_ID', note }),
+>>>>>>> 721e1e084c4d1a67b0fc35f8a3d1c2a1ca9cf2fe
     });
     // Refresh list
     setRequests(prev => prev.filter((r: { id: string }) => r.id !== id));

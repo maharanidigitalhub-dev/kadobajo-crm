@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-const H = {
-  apikey: SUPABASE_KEY,
-  Authorization: `Bearer ${SUPABASE_KEY}`,
-  'Content-Type': 'application/json',
-  Prefer: 'return=representation',
-};
+import { supabase } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,48 +12,60 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!name || !phone) {
-      return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Name and phone are required' },
+        { status: 400 }
+      );
     }
 
+    // Hanya kirim kolom yang ADA di tabel
     const payload: Record<string, unknown> = {
       name,
       phone,
       status: 'new',
-      source:           source ?? source_slug ?? utm_source ?? 'landing_page',
-      source_slug:      source_slug ?? null,
+      source: source ?? source_slug ?? utm_source ?? 'landing_page',
+      source_slug:      source_slug      ?? null,
       audience_segment: audience_segment ?? null,
-      landing_url:      landing_url ?? null,
-      device:           device ?? null,
+      landing_url:      landing_url      ?? null,
     };
 
-    if (email)        payload.email        = email;
-    if (country)      payload.country      = country;
-    if (city)         payload.city         = city;
-    if (utm_source)   payload.utm_source   = utm_source;
-    if (utm_medium)   payload.utm_medium   = utm_medium;
-    if (utm_campaign) payload.utm_campaign = utm_campaign;
-    if (utm_content)  payload.utm_content  = utm_content;
-    if (flight_date)  payload.notes        = `Flight: ${flight_date}${notes ? '. ' + notes : ''}`;
-    else if (notes)   payload.notes        = notes;
+    if (email)   payload.email   = email;
+    if (country) payload.country = country;
+    if (city)    payload.city    = city;
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/customers`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-    });
+    // Simpan UTM & device ke kolom notes karena belum ada kolomnya
+    const extraNotes = [
+      flight_date  ? `Flight: ${flight_date}`       : null,
+      utm_source   ? `utm_source: ${utm_source}`     : null,
+      utm_medium   ? `utm_medium: ${utm_medium}`     : null,
+      utm_campaign ? `utm_campaign: ${utm_campaign}` : null,
+      utm_content  ? `utm_content: ${utm_content}`   : null,
+      device       ? `device: ${device}`             : null,
+      notes        ? notes                           : null,
+    ].filter(Boolean).join(' | ');
 
-    const data = await res.json();
+    if (extraNotes) payload.notes = extraNotes;
 
-    if (!res.ok) {
-      console.error('[leads] Supabase error:', data);
-      // Still return success — redirect to WhatsApp even if DB fails
-      return NextResponse.json({ success: true, warning: 'DB save failed' });
+    const { data, error } = await supabase.from('customers').insert(payload);
+
+    if (error) {
+      console.error('[leads] Supabase error:', error);
+      return NextResponse.json(
+        { error: 'Gagal menyimpan data', detail: error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true, customer: Array.isArray(data) ? data[0] : data });
+    return NextResponse.json({
+      success: true,
+      customer: Array.isArray(data) ? data[0] : data,
+    });
+
   } catch (err) {
-    console.error('[leads] Error:', err);
-    return NextResponse.json({ success: true, warning: 'Server error' });
+    console.error('[leads] Unexpected error:', err);
+    return NextResponse.json(
+      { error: 'Server error' },
+      { status: 500 }
+    );
   }
 }

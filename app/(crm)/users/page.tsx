@@ -26,20 +26,14 @@ export default function UsersPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
-<<<<<<< HEAD
+
     // BUGFIX: Cek res.ok dulu sebelum update state — sebelumnya error object ikut di-push ke array users
     if (!res.ok) {
       const err = await res.json();
       alert(err?.error ?? 'Gagal membuat user');
       return;
     }
-=======
->>>>>>> 721e1e084c4d1a67b0fc35f8a3d1c2a1ca9cf2fe
-    const newUser = await res.json();
-    setUsers(prev => [newUser, ...prev]);
-    setShowForm(false);
-    setForm({ name: '', email: '', password: '', role: 'admin' });
-  }
+
 
   async function handleRoleChange(userId: string, role: UserRole) {
     await fetch(`/api/users/${userId}`, {
